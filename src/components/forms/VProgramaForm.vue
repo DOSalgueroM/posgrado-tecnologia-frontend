@@ -309,7 +309,23 @@ const onSubmit = async () => {
       });
     }
 
-    router.push(getTipoPrograma.value.toLowerCase() + 's');
+    // Corregir la redirección basada en el tipo de programa
+    let ruta = '/';
+    switch (props.tipo) {
+      case 1:
+        ruta = '/diplomados';
+        break;
+      case 2:
+        ruta = '/maestrias';
+        break;
+      case 3:
+        ruta = '/especialidades';
+        break;
+      case 4:
+        ruta = '/doctorados';
+        break;
+    }
+    router.push(ruta);
   } catch (error: any) {
     console.error('Error completo:', error);
     if (error.response?.data) {
