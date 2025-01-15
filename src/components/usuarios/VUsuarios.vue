@@ -80,11 +80,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { UserService } from './services/user';
+import { UserService } from '../services/user';
 import { Notify } from 'quasar';
-import { MunicipiosService } from './services/municipio';
-import { RecintosService } from './services/recinto';
-import { UserRecintoService } from './services/user-recinto';
+import { MunicipiosService } from '../services/municipio';
+import { RecintosService } from '../services/recinto';
+import { UserRecintoService } from '../services/user-recinto';
 import { watch } from 'vue';
 
 // Variables reactivas

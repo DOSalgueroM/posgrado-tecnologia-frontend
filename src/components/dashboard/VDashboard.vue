@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { ActasService } from './services/actas';
+import { ActasService } from '../services/actas';
 import { useRouter } from 'vue-router';
 import { QDialog, useQuasar } from 'quasar';
 import { jsPDF } from "jspdf";

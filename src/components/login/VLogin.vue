@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { LoginService } from './services/login';
+import { LoginService } from '../services/login';
 
 // Variables reactivas
 const username = ref('');
