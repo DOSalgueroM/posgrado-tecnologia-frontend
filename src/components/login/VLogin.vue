@@ -3,7 +3,7 @@
         <!-- Opcional: Header, si es necesario -->
         <q-header class="bg-primary text-white">
             <q-toolbar>
-                <q-toolbar-title>Cómputo Elecciones Judiciales</q-toolbar-title>
+                <q-toolbar-title>Facultad de Ciencias yTecnología</q-toolbar-title>
             </q-toolbar>
         </q-header>
 
@@ -13,7 +13,7 @@
                 <q-card class="login-card q-pa-lg" style="width: 400px">
                     <q-card-section class="text-center">
                         <div class="text-h5 text-weight-bold text-primary">
-                            Cómputo Elecciones Judiciales
+                            Programas de Posgrado
                         </div>
                         <div class="text-subtitle2 text-grey-7 q-mt-sm">
                             Sistema de Autenticación
@@ -71,23 +71,20 @@ const handleLogin = async () => {
     error.value = '';
 
     try {
-        // Envía las credenciales al backend
         const authUser = await LoginService.obtenerCredenciales({
             username: username.value,
             password: password.value,
         });
 
-        // Guarda el token y los datos del usuario
         localStorage.setItem('authToken', authUser.access_token);
         localStorage.setItem('authUser', JSON.stringify(authUser.usuario));
 
-        // Redirige según el rol del usuario
-        if (authUser.usuario.rol === 'ADMINISTRADOR') {
+        if (authUser.usuario.rol === 'ADMIN') {
             router.push('/');
-        } else if (authUser.usuario.rol === 'USUARIO_RECINTO') {
-            router.push('/formulario');
-        } else if (authUser.usuario.rol === 'TRANSCRIPTOR') {
-            router.push('/');
+        // } else if (authUser.usuario.rol === 'USUARIO_RECINTO') {
+        //     router.push('/formulario');
+        // } else if (authUser.usuario.rol === 'TRANSCRIPTOR') {
+        //     router.push('/');
         } else {
             error.value = 'Usuario o contraseña incorrectos';
         }
