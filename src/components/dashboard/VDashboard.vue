@@ -23,6 +23,7 @@
                             :src="programa.imagen_url || 'https://cdn.quasar.dev/img/mountains.jpg'"
                             basic
                             style="height: 200px"
+                            @error="(e) => console.error('Error cargando imagen:', e)"
                         >
                             <div class="absolute-bottom text-h6 text-white">
                                 {{ programa.nombre }}
@@ -31,8 +32,13 @@
 
                         <q-card-section>
                             <div class="text-subtitle2">{{ programa.sigla }}</div>
-                            <div class="text-caption text-grey">
+                            <div class="text-caption text-grey q-mb-md">
                                 {{ programa.descripcion }}
+                            </div>
+                            <div class="row items-center q-gutter-sm">
+                                <q-chip v-for="area in programa.areas" :key="area" color="primary" text-color="white">
+                                    {{ area }}
+                                </q-chip>
                             </div>
                         </q-card-section>
 
@@ -44,7 +50,10 @@
                                 <q-chip icon="event" color="secondary" text-color="white">
                                     {{ programa.gestion }}
                                 </q-chip>
-                                <q-chip icon="location_on" color="accent" text-color="white">
+                                <q-chip icon="school" color="accent" text-color="white">
+                                    {{ programa.modalidad }}
+                                </q-chip>
+                                <q-chip icon="location_on" color="positive" text-color="white">
                                     {{ programa.sede }}
                                 </q-chip>
                             </div>
@@ -99,9 +108,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { QDialog, useQuasar } from 'quasar';
+import { useQuasar, QDialog } from 'quasar';
 import { ProgramaService } from '../services/programa';
-import { IPrograma, TipoPrograma } from '../interfaces/IPrograma';
+import type { IPrograma } from '../interfaces/IPrograma';
+import { TipoPrograma } from '../interfaces/IPrograma';
 
 const $q = useQuasar();
 const route = useRouter();
@@ -232,14 +242,11 @@ const fetchProgramas = async () => {
                 response = await ProgramaService.obtenerProgramas();
         }
 
-        rows.value = response.map((item: any, index: number) => ({
-            index: index + 1,
-            id: item.id,
-            nombre: item.nombre,
-            descripcion: item.descripcion,
-            duracion_meses: item.duracion_meses,
-            modalidad: item.modalidad,
-            fecha_inicio: new Date(item.fecha_inicio).toLocaleDateString(),
+        console.log('Programas recibidos:', response); // Para depuración
+        rows.value = response.map((item: any) => ({
+            ...item, // Mantener todos los atributos originales
+            fecha_inicio: item.fecha_inicio ? new Date(item.fecha_inicio).toLocaleDateString() : '',
+            areas: Array.isArray(item.areas) ? item.areas.join(', ') : item.areas
         }));
     } catch (error: any) {
         console.error('Error al obtener programas:', error);

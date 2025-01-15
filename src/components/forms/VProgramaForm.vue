@@ -26,7 +26,10 @@
             v-model="formData.descripcion"
             type="textarea"
             label="Descripción *"
-            :rules="[val => !!val || 'La descripción es requerida']"
+            :rules="[
+              val => !!val || 'La descripción es requerida',
+              val => val.length >= 10 || 'La descripción debe tener al menos 10 caracteres'
+            ]"
             outlined
           />
         </div>
@@ -34,12 +37,15 @@
         <div class="col-12 col-md-6">
           <q-select
             v-model="formData.areas"
-            :options="Object.values(Area)"
+            :options="areaOptions"
             label="Áreas *"
             multiple
             use-chips
             stack-label
-            :rules="[val => val && val.length > 0 || 'Debe seleccionar al menos un área']"
+            :rules="[
+              (val: Area[]) => val && val.length > 0 || 'Debe seleccionar al menos un área',
+              (val: Area[]) => val.every((area: Area) => Object.values(Area).includes(area)) || 'Área no válida'
+            ]"
             outlined
           >
             <template v-slot:selected-item="scope">
@@ -199,20 +205,14 @@ const municipios = [
   'Macharetí'
 ];
 
-const getTipoPrograma = computed(() => {
-  switch (props.tipo) {
-    case 1:
-      return TipoPrograma.DIPLOMADO;
-    case 2:
-      return TipoPrograma.MAESTRIA;
-    case 3:
-      return TipoPrograma.ESPECIALIDAD;
-    case 4:
-      return TipoPrograma.DOCTORADO;
-    default:
-      return TipoPrograma.DIPLOMADO;
-  }
-});
+const tipoMap = {
+  1: TipoPrograma.DIPLOMADO,
+  2: TipoPrograma.MAESTRIA,
+  3: TipoPrograma.ESPECIALIDAD,
+  4: TipoPrograma.DOCTORADO
+};
+
+const areaOptions = Object.values(Area);
 
 const formData = ref({
   nombre: '',
@@ -225,7 +225,7 @@ const formData = ref({
   fecha_inicio: '',
   sede: '',
   imagen_url: null as File | null,
-  tipo: getTipoPrograma.value
+  tipo: computed(() => tipoMap[props.tipo as keyof typeof tipoMap])
 });
 
 const previewImage = computed(() => {
@@ -261,20 +261,38 @@ const onSubmit = async () => {
   try {
     const formDataToSend = new FormData();
     
+    const dataToSend = {
+      nombre: formData.value.nombre,
+      sigla: formData.value.sigla,
+      descripcion: formData.value.descripcion,
+      areas: formData.value.areas,
+      duracion_meses: formData.value.duracion_meses,
+      modalidad: formData.value.modalidad,
+      gestion: formData.value.gestion,
+      fecha_inicio: formData.value.fecha_inicio,
+      sede: formData.value.sede,
+      tipo: formData.value.tipo
+    };
+    
+    console.log('Datos a enviar:', dataToSend);
+    
     if (formData.value.imagen_url instanceof File) {
       formDataToSend.append('imagen_url', formData.value.imagen_url);
     }
 
-    formDataToSend.append('nombre', formData.value.nombre);
-    formDataToSend.append('sigla', formData.value.sigla);
-    formDataToSend.append('descripcion', formData.value.descripcion);
-    formDataToSend.append('areas', JSON.stringify(formData.value.areas));
-    formDataToSend.append('duracion_meses', formData.value.duracion_meses?.toString() || '');
-    formDataToSend.append('modalidad', formData.value.modalidad as string);
-    formDataToSend.append('gestion', formData.value.gestion.toString());
-    formDataToSend.append('fecha_inicio', formData.value.fecha_inicio);
-    formDataToSend.append('sede', formData.value.sede);
-    formDataToSend.append('tipo', formData.value.tipo);
+    const areasArray = formData.value.areas || [];
+    formDataToSend.append('areas', JSON.stringify(areasArray));
+
+    Object.entries(dataToSend).forEach(([key, value]) => {
+      if (key !== 'areas' && value !== null && value !== undefined) {
+        formDataToSend.append(key, String(value));
+      }
+    });
+
+    console.log('--- FormData Entries ---');
+    for (const [key, value] of formDataToSend.entries()) {
+      console.log(`${key}: ${value}`);
+    }
 
     if (isEditing.value) {
       await ProgramaService.actualizarProgramaFormData(props.id!, formDataToSend);
@@ -283,35 +301,55 @@ const onSubmit = async () => {
         message: 'Programa actualizado exitosamente'
       });
     } else {
-      await ProgramaService.crearPrograma(formDataToSend);
+      const response = await ProgramaService.crearPrograma(formDataToSend);
+      console.log('Respuesta del servidor:', response);
       $q.notify({
         type: 'positive',
         message: 'Programa creado exitosamente'
       });
     }
 
-    switch (props.tipo) {
-      case 1:
-        router.push('/diplomados');
-        break;
-      case 2:
-        router.push('/maestrias');
-        break;
-      case 3:
-        router.push('/especialidades');
-        break;
-      case 4:
-        router.push('/doctorados');
-        break;
+    router.push(getTipoPrograma.value.toLowerCase() + 's');
+  } catch (error: any) {
+    console.error('Error completo:', error);
+    if (error.response?.data) {
+      console.error('Detalles del error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      });
+
+      if (error.response.data.message) {
+        if (Array.isArray(error.response.data.message)) {
+          console.error('Errores de validación:');
+          error.response.data.message.forEach((msg: string, index: number) => {
+            console.error(`${index + 1}. ${msg}`);
+          });
+        } else {
+          console.error('Mensaje de error:', error.response.data.message);
+        }
+      }
     }
-  } catch (error) {
-    console.error('Error al guardar el programa:', error);
+    
+    let errorMessage = 'Error al crear el programa';
+    if (error.response?.data?.message) {
+      if (Array.isArray(error.response.data.message)) {
+        errorMessage = error.response.data.message[0];
+      } else {
+        errorMessage = error.response.data.message;
+      }
+    }
+    
     $q.notify({
       type: 'negative',
-      message: `Error al ${isEditing.value ? 'actualizar' : 'crear'} el programa`
+      message: errorMessage
     });
   }
 };
+
+const getTipoPrograma = computed(() => {
+  return tipoMap[props.tipo as keyof typeof tipoMap];
+});
 </script>
 
 <style scoped>
