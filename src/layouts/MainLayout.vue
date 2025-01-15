@@ -32,7 +32,7 @@
             <q-item-label>Usuarios</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+        <q-item to="/diplomados" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="done" />
           </q-item-section>
@@ -40,7 +40,7 @@
             <q-item-label>Diplomados</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+        <q-item to="/maestrias" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="done" />
           </q-item-section>
@@ -48,7 +48,7 @@
             <q-item-label>Maestrías</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+        <q-item to="/especialidades" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="done" />
           </q-item-section>
@@ -56,7 +56,7 @@
             <q-item-label>Especialidades</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+        <q-item to="/doctorados" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="done" />
           </q-item-section>

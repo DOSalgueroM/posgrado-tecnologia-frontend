@@ -1,8 +1,8 @@
 <template>
-    <VDashboard :registrado= "1" />
+    <VDashboard :tipo= "1" />
 
 </template>
 
 <script setup lang="ts">
-import VDashboard from './VDashboard.vue';
+import VDashboard from '../dashboard/VDashboard.vue';
 </script>

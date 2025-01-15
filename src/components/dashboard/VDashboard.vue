@@ -1,89 +1,91 @@
 <template>
     <q-page>
-        <q-tabs v-model="activeTab" class="text-primary" align="left">
-            <q-tab name="actas" label="Actas" />
-            <q-tab name="observados" label="Observados" />
+        <div class="row items-center q-pa-md">
+            <div class="text-h6">{{ getTitleByType }}</div>
             <q-space />
             <div class="button-container" v-if="admin">
-                <q-btn label="Crear Usuarios" color="primary" style="width: 180px; margin-right: 20px;"
-                    @click="crearUsers" />
+                <q-btn :label="'Crear ' + getTitleByType" color="primary" style="width: 180px; margin-right: 20px;"
+                    @click="crearPrograma" />
             </div>
-            <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre"
-                class="q-ml-md" style="margin-right: 20px;">
+            <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre o descripción"
+                class="q-ml-md" style="width: 300px;">
                 <template v-slot:prepend>
                     <q-icon name="search" />
                 </template>
             </q-input>
-
-        </q-tabs>
+        </div>
 
         <q-table :rows="filteredRows" :columns="columns" row-key="id" virtual-scroll flat dense separator="horizontal"
-            style="height: calc(100vh - 8.6rem)" class="q-mt-md">
-            <template v-slot:body-cell-estado="props">
-                <q-td :props="props" :class="getEstadoClass(props.row.estado)">
-                    {{ props.row.estado }}
-                </q-td>
-            </template>
+            style="height: calc(100vh - 8.6rem)" class="q-mx-md">
             <template v-slot:body-cell-actions="props">
                 <q-td class="text-center">
-
                     <q-btn dense flat round icon="visibility" color="primary" @click="viewDocument(props.row)" />
                     <q-btn dense flat round icon="edit" color="secondary" @click="editRow(props.row)" />
                     <q-btn dense flat round icon="delete" color="negative" @click="deleteRow(props.row)" />
-                    <!-- </div> -->
-
                 </q-td>
             </template>
-
         </q-table>
     </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { ActasService } from '../services/actas';
+import { ProgramaService } from '../services/programa';
 import { useRouter } from 'vue-router';
 import { QDialog, useQuasar } from 'quasar';
-import { jsPDF } from "jspdf";
-
 
 const $q = useQuasar();
 const route = useRouter();
-const activeTab = ref('actas');
+const activeTab = ref('programas');
 const search = ref('');
 const admin = ref(false);
-interface Row {
-    id: number;
-    municipio: string;
-    recinto: string;
-    mesa: string;
-    observado: string;
-}
 
 const props = defineProps<{
-    registrado: number;
+    tipo: number;
 }>();
 
-const rows = ref<Row[]>([]);
+const rows = ref<any[]>([]);
 const searchMunicipio = ref('');
-const searchRecinto = ref('');
 
+const getTitleByType = computed(() => {
+    switch (props.tipo) {
+        case 1:
+            return 'Diplomado';
+        case 2:
+            return 'Maestría';
+        case 3:
+            return 'Especialidad';
+        case 4:
+            return 'Doctorado';
+        default:
+            return 'Programa';
+    }
+});
 
-const crearUsers = () => {
-    route.push('/usuarios');
+const crearPrograma = () => {
+    switch (props.tipo) {
+        case 1:
+            route.push('/diplomados/crear');
+            break;
+        case 2:
+            route.push('/maestrias/crear');
+            break;
+        case 3:
+            route.push('/especialidades/crear');
+            break;
+        case 4:
+            route.push('/doctorados/crear');
+            break;
+    }
 };
 
-const getEstadoClass = (estado: string) => {
-    console.log('estado', estado);
-    return estado === 'PENDIENTE' ? 'row-pending' : 'row-registered';
-};
 const columns = [
     { name: 'index', label: 'N°', align: 'left' as const, field: 'index', style: 'width: 100px; padding-left: 20px' },
-    { name: 'nombre', label: 'Nombre', align: 'left' as const, field: 'municipio', style: 'width: 300px' },
-    { name: 'descripcion', label: 'Descripción', align: 'left' as const, field: 'descripcion' },
-    { name: 'duracion', label: 'Duración', align: 'center' as const, field: 'duracion', style: 'width: 300px' },
-    { name: 'modalidad', label: 'Observado', align: 'center' as const, field: 'observado', style: 'width: 300px' },
-    { name: 'fecha', label: 'Fecha de Inicio', align: 'center' as const, field: 'fecha' },
+    { name: 'nombre', label: 'Nombre', align: 'left' as const, field: 'nombre', style: 'width: 300px' },
+    { name: 'descripcion', label: 'Descripción', align: 'left' as const, field: 'descripcion', style: 'width: 10px' },
+    { name: 'duracion_meses', label: 'Duración', align: 'center' as const, field: 'duracion_meses', style: 'width: 300px' },
+    { name: 'modalidad', label: 'Modalidad', align: 'center' as const, field: 'modalidad', style: 'width: 300px' },
+    { name: 'fecha_inicio', label: 'Fecha de Inicio', align: 'center' as const, field: 'fecha_inicio' },
     { name: 'actions', label: 'Acciones', align: 'center' as const, field: (row: any) => row.actions },
 ];
 
@@ -92,177 +94,126 @@ onMounted(async () => {
     if (usuario.rol === 'ADMIN') {
         admin.value = true;
     }
-    try {
-        console.log('props.registrado', props.registrado);
-        const response = await ActasService.obtenerActas();
-
-        if (props.registrado) {
-            console.log('props.registrado', props.registrado);
-            rows.value = response.data
-                .filter((item: any) => item.estado === 'REGISTRADO')
-                .sort((a: any, b: any) => {
-
-                    if (a.mesa.recinto.municipio.descripcion < b.mesa.recinto.municipio.descripcion) {
-                        return -1;
-                    }
-                    if (a.mesa.recinto.municipio.descripcion > b.mesa.recinto.municipio.descripcion) {
-                        return 1;
-                    }
-
-                    if (a.mesa.recinto.descripcion < b.mesa.recinto.descripcion) {
-                        return -1;
-                    }
-                    if (a.mesa.recinto.descripcion > b.mesa.recinto.descripcion) {
-                        return 1;
-                    }
-                    return a.mesa.nro_mesa - b.mesa.nro_mesa;
-                })
-                .map((item: any, index: number) => ({
-                    index: index + 1,
-                    id: item.id,
-                    mesa: `Mesa ${item.mesa.nro_mesa}`,
-                    municipio: item.mesa.recinto.municipio.descripcion,
-                    recinto: item.mesa.recinto.descripcion,
-                    observado: item.observado ? 'Sí' : 'No',
-                    estado: item.estado,
-                }));
-        } else {
-            rows.value = response.data
-                .map((item: any, index: number) => ({
-                    index: index + 1,
-                    id: item.id,
-                    mesa: `Mesa ${item.mesa.nro_mesa}`,
-                    municipio: item.mesa.recinto.municipio.descripcion,
-                    recinto: item.mesa.recinto.descripcion,
-                    observado: item.observado ? 'Sí' : 'No',
-                    estado: item.estado,
-                }));
-            console.log('rows', rows.value);
-        }
-    } catch (error: any) {
-        console.error('Error al obtener actas:', error);
-    }
+    await fetchProgramas();
 });
 
+const fetchProgramas = async () => {
+    try {
+        let response;
+        switch (props.tipo) {
+            case 1:
+                response = await ProgramaService.obtenerDiplomados();
+                break;
+            case 2:
+                response = await ProgramaService.obtenerMaestrias();
+                break;
+            case 3:
+                response = await ProgramaService.obtenerEspecialidades();
+                break;
+            case 4:
+                response = await ProgramaService.obtenerDoctorados();
+                break;
+            default:
+                response = await ProgramaService.obtenerProgramas();
+        }
+
+        rows.value = response.map((item: any, index: number) => ({
+            index: index + 1,
+            id: item.id,
+            nombre: item.nombre,
+            descripcion: item.descripcion,
+            duracion_meses: item.duracion_meses,
+            modalidad: item.modalidad,
+            fecha_inicio: new Date(item.fecha_inicio).toLocaleDateString(),
+        }));
+    } catch (error: any) {
+        console.error('Error al obtener programas:', error);
+        $q.notify({
+            type: 'negative',
+            message: 'Error al obtener los programas'
+        });
+    }
+};
 
 const filteredRows = computed(() => {
     let filtered = rows.value;
-
-    if (activeTab.value === 'observados') {
-        filtered = filtered.filter(row => row.observado === 'Sí');
+    if (searchMunicipio.value) {
+        filtered = filtered.filter(row => 
+            row.nombre.toLowerCase().includes(searchMunicipio.value.toLowerCase()) ||
+            row.descripcion.toLowerCase().includes(searchMunicipio.value.toLowerCase())
+        );
     }
-
     return filtered;
 });
 
-
-watch([searchMunicipio, searchRecinto], async () => {
-    await fetchActas();
-    console.log('searchMunicipio', searchMunicipio.value);
-    if (searchMunicipio.value === '' && searchRecinto.value === '') {
-        fetchActas();
-    }
-});
-
-const fetchActas = async () => {
-
-    try {
-        // declarar variable response
-        let response;
-        if (searchMunicipio.value !== '' && searchRecinto.value !== '') {
-            response = await ActasService.obtener({
-                municipio: searchMunicipio.value,
-                recinto: searchRecinto.value,
-                page: 1,
-                limit: 50,
-            });
-        }
-        else if (searchMunicipio.value !== '') {
-            response = await ActasService.obtener({
-                municipio: searchMunicipio.value,
-                page: 1,
-                limit: 50,
-            });
-        }
-        else if (searchRecinto.value !== '') {
-            response = await ActasService.obtener({
-                recinto: searchRecinto.value,
-                page: 1,
-                limit: 50,
-            });
-        }
-        else {
-            response = await ActasService.obtenerActas();
-        }
-
-        rows.value = response.data.map((item: any, index: number) => ({
-            index: index + 1,
-            id: item.id,
-            mesa: `Mesa ${item.mesa.nro_mesa}`,
-            municipio: item.mesa.recinto.municipio.descripcion,
-            recinto: item.mesa.recinto.descripcion,
-            observado: item.observado ? 'Sí' : 'No',
-            estado: item.estado,
-        }));
-    } catch (error) {
-        console.error('Error al obtener actas:', error);
-    }
-};
-
-
-
 const viewDocument = async (row: any) => {
-    try {
-        const acta = await ActasService.obtenerActaById(row.id);
+    // try {
+    //     const acta = await ActasService.obtenerActaById(row.id);
 
-        if (acta.imagen) {
+    //     if (acta.imagen) {
 
-            const pdf = new jsPDF();
-            const imgWidth = 210;
-            const imgHeight = (210 * 3) / 4;
+    //         const pdf = new jsPDF();
+    //         const imgWidth = 210;
+    //         const imgHeight = (210 * 3) / 4;
 
-            pdf.addImage(`data:image/png;base64,${acta.imagen}`, 'PNG', 0, 10, imgWidth, imgHeight);
-            const pdfBlob = pdf.output('blob');
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            window.open(pdfUrl, '_blank');
-        } else {
-            alert('No hay documento disponible para esta acta.');
-        }
-    } catch (error) {
-        console.error('Error al cargar el documento:', error);
-        alert('Error al cargar el documento.');
-    }
+    //         pdf.addImage(`data:image/png;base64,${acta.imagen}`, 'PNG', 0, 10, imgWidth, imgHeight);
+    //         const pdfBlob = pdf.output('blob');
+    //         const pdfUrl = URL.createObjectURL(pdfBlob);
+    //         window.open(pdfUrl, '_blank');
+    //     } else {
+    //         alert('No hay documento disponible para esta acta.');
+    //     }
+    // } catch (error) {
+    //     console.error('Error al cargar el documento:', error);
+    //     alert('Error al cargar el documento.');
+    // }
 };
-
 
 
 const editRow = (row: any) => {
-
-    window.location.href = `/formulario?id=${row.id}`;
-};
-
-const deleteRow = async (row: any) => {
-    const confirmResponse = confirm('¿Está seguro de eliminar el acta?');
-    if (confirmResponse) {
-        try {
-            const response = await ActasService.eliminarActa(row.id);
-            rows.value = rows.value.filter((item: any) => item.id !== row.id);
-            alert(response.message);
-        } catch (error) {
-            console.error('Error al eliminar acta:', error);
-            alert('Error al eliminar el acta');
-        }
+    switch (props.tipo) {
+        case 1:
+            route.push(`/diplomados/editar/${row.id}`);
+            break;
+        case 2:
+            route.push(`/maestrias/editar/${row.id}`);
+            break;
+        case 3:
+            route.push(`/especialidades/editar/${row.id}`);
+            break;
+        case 4:
+            route.push(`/doctorados/editar/${row.id}`);
+            break;
     }
 };
 
+const deleteRow = async (row: any) => {
+    try {
+        await $q.dialog({
+            title: 'Confirmar',
+            message: '¿Está seguro de eliminar este programa?',
+            cancel: true,
+            persistent: true
+        });
 
+        await ProgramaService.eliminarPrograma(row.id);
+        await fetchProgramas();
+        
+        $q.notify({
+            type: 'positive',
+            message: 'Programa eliminado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error al eliminar el programa:', error);
+        $q.notify({
+            type: 'negative',
+            message: 'Error al eliminar el programa'
+        });
+    }
+};
 </script>
 
 <style scoped>
-.q-tabs {
-    margin-bottom: 16px;
-}
-
 .q-table {
     background-color: white;
     border-radius: 8px;
@@ -275,22 +226,5 @@ const deleteRow = async (row: any) => {
     align-items: center;
     height: 50px;
     margin-right: 10px;
-}
-
-.row-pending {
-    padding: 10px;
-    background-clip: content-box;
-    /* <---- */
-    box-shadow: inset 0 0 0 10px white;
-    background-color: #f8d7da;
-    /* <-- 10px spread radius */
-}
-
-.row-registered {
-    background-color: #ccffcc;
-    padding: 10px;
-    background-clip: content-box;
-    /* <---- */
-    box-shadow: inset 0 0 0 10px white;
 }
 </style>
