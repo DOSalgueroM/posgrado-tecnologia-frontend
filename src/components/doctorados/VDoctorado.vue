@@ -1,5 +1,5 @@
 <template>
-    <VDashboard :registrado= "1" />
+    <VDashboard :registrado= "4" />
 
 </template>
 

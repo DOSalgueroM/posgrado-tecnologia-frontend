@@ -4,22 +4,11 @@
             <q-tab name="actas" label="Actas" />
             <q-tab name="observados" label="Observados" />
             <q-space />
-            <div class="button-container">
-                <q-btn label="Crear Acta" color="primary" style="width: 180px; margin-right: 20px;"
-                    @click="crearActa" />
-            </div>
             <div class="button-container" v-if="admin">
                 <q-btn label="Crear Usuarios" color="primary" style="width: 180px; margin-right: 20px;"
                     @click="crearUsers" />
             </div>
-            <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por municipio"
-                class="q-ml-md" style="margin-right: 20px;">
-                <template v-slot:prepend>
-                    <q-icon name="search" />
-                </template>
-            </q-input>
-
-            <q-input outlined dense debounce="400" v-model="searchRecinto" placeholder="Buscar por recinto"
+            <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre"
                 class="q-ml-md" style="margin-right: 20px;">
                 <template v-slot:prepend>
                     <q-icon name="search" />
@@ -72,17 +61,13 @@ interface Row {
 }
 
 const props = defineProps<{
-    registrado: boolean;
+    registrado: number;
 }>();
 
 const rows = ref<Row[]>([]);
 const searchMunicipio = ref('');
 const searchRecinto = ref('');
 
-
-const crearActa = () => {
-    route.push('/formulario');
-};
 
 const crearUsers = () => {
     route.push('/usuarios');
@@ -94,23 +79,25 @@ const getEstadoClass = (estado: string) => {
 };
 const columns = [
     { name: 'index', label: 'N°', align: 'left' as const, field: 'index', style: 'width: 100px; padding-left: 20px' },
-    { name: 'municipio', label: 'Municipio', align: 'left' as const, field: 'municipio', style: 'width: 300px' },
-    { name: 'recinto', label: 'Recinto', align: 'left' as const, field: 'recinto' },
-    { name: 'mesa', label: 'Mesa', align: 'center' as const, field: 'mesa', style: 'width: 300px' },
-    { name: 'observado', label: 'Observado', align: 'center' as const, field: 'observado', style: 'width: 300px' },
-    { name: 'estado', label: 'Estado', align: 'center' as const, field: 'estado' },
+    { name: 'nombre', label: 'Nombre', align: 'left' as const, field: 'municipio', style: 'width: 300px' },
+    { name: 'descripcion', label: 'Descripción', align: 'left' as const, field: 'descripcion' },
+    { name: 'duracion', label: 'Duración', align: 'center' as const, field: 'duracion', style: 'width: 300px' },
+    { name: 'modalidad', label: 'Observado', align: 'center' as const, field: 'observado', style: 'width: 300px' },
+    { name: 'fecha', label: 'Fecha de Inicio', align: 'center' as const, field: 'fecha' },
     { name: 'actions', label: 'Acciones', align: 'center' as const, field: (row: any) => row.actions },
 ];
 
 onMounted(async () => {
     const usuario = JSON.parse(localStorage.getItem('authUser') || '{}');
-    if (usuario.rol === 'ADMINISTRADOR') {
+    if (usuario.rol === 'ADMIN') {
         admin.value = true;
     }
     try {
+        console.log('props.registrado', props.registrado);
         const response = await ActasService.obtenerActas();
 
         if (props.registrado) {
+            console.log('props.registrado', props.registrado);
             rows.value = response.data
                 .filter((item: any) => item.estado === 'REGISTRADO')
                 .sort((a: any, b: any) => {
