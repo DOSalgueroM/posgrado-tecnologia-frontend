@@ -3,7 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn flat dense round @click="toggleLeftDrawer" icon="menu" aria-label="Menu" />
-        <q-toolbar-title>Quasar App</q-toolbar-title>
+        <q-toolbar-title>Programa de Posgrado de Facultad de Tecnologia</q-toolbar-title>
         <q-space />
         <div class="q-gutter-sm row items-center no-wrap">
           <q-btn round dense flat :icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"
@@ -21,43 +21,55 @@
             <q-icon name="dashboard" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Actas</q-item-label>
+            <q-item-label>General</q-item-label>
           </q-item-section>
         </q-item>
-        <q-expansion-item icon="location_pin" label="Estadísticas">
-          <q-list class="q-pl-lg">
-            <q-item to="/dashboard" active-class="q-item-no-link-highlighting">
-              <q-item-section avatar>
-                <q-icon name="email" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>General</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item to="/Lock" active-class="q-item-no-link-highlighting">
-              <q-item-section avatar>
-                <q-icon name="location_pin" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Municipio</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item to="/Lock-2" active-class="q-item-no-link-highlighting">
-              <q-item-section avatar>
-                <q-icon name="lock" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Recinto</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-expansion-item>
         <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="done" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Revisados</q-item-label>
+            <q-item-label>Usuarios</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+          <q-item-section avatar>
+            <q-icon name="done" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Diplomados</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+          <q-item-section avatar>
+            <q-icon name="done" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Maestrías</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+          <q-item-section avatar>
+            <q-icon name="done" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Especialidades</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+          <q-item-section avatar>
+            <q-icon name="done" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Doctorados</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/Dashboard3" active-class="q-item-no-link-highlighting">
+          <q-item-section avatar>
+            <q-icon name="done" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Notificaciones</q-item-label>
           </q-item-section>
         </q-item>
         <!-- Más ítems aquí -->
