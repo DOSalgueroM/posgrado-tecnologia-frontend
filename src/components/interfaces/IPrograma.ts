@@ -1,4 +1,3 @@
-
 export enum TipoPrograma {
     DIPLOMADO = 'DIPLOMADO',
     MAESTRIA = 'MAESTRIA',
@@ -18,17 +17,17 @@ export enum Area {
     SEMIPRESENCIAL = 'SEMIPRESENCIAL',
   }
 
-export interface Programa {
+export interface IPrograma {
     id?: number;
     nombre: string;
     descripcion: string;
+    sigla: string;
     tipo: TipoPrograma;
     duracion_meses: string;
     modalidad: Modalidad;
-    area: Area;
+    areas: Area[];
     imagen_url: string;
     gestion: number;
     fecha_inicio: Date;
-    sede: string,
-    sigla: string
-  }
+    sede: string;
+}

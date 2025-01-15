@@ -15,24 +15,93 @@
             </q-input>
         </div>
 
-        <q-table :rows="filteredRows" :columns="columns" row-key="id" virtual-scroll flat dense separator="horizontal"
-            style="height: calc(100vh - 8.6rem)" class="q-mx-md">
-            <template v-slot:body-cell-actions="props">
-                <q-td class="text-center">
-                    <q-btn dense flat round icon="visibility" color="primary" @click="viewDocument(props.row)" />
-                    <q-btn dense flat round icon="edit" color="secondary" @click="editRow(props.row)" />
-                    <q-btn dense flat round icon="delete" color="negative" @click="deleteRow(props.row)" />
-                </q-td>
-            </template>
-        </q-table>
+        <div class="q-pa-md">
+            <div class="row q-col-gutter-md">
+                <div v-for="programa in filteredRows" :key="programa.id" class="col-12 col-sm-6 col-md-4">
+                    <q-card class="my-card">
+                        <q-img
+                            :src="programa.imagen_url || 'https://cdn.quasar.dev/img/mountains.jpg'"
+                            basic
+                            style="height: 200px"
+                        >
+                            <div class="absolute-bottom text-h6 text-white">
+                                {{ programa.nombre }}
+                            </div>
+                        </q-img>
+
+                        <q-card-section>
+                            <div class="text-subtitle2">{{ programa.sigla }}</div>
+                            <div class="text-caption text-grey">
+                                {{ programa.descripcion }}
+                            </div>
+                        </q-card-section>
+
+                        <q-card-section>
+                            <div class="row items-center q-gutter-sm">
+                                <q-chip icon="schedule" color="primary" text-color="white">
+                                    {{ programa.duracion_meses }} meses
+                                </q-chip>
+                                <q-chip icon="event" color="secondary" text-color="white">
+                                    {{ programa.gestion }}
+                                </q-chip>
+                                <q-chip icon="location_on" color="accent" text-color="white">
+                                    {{ programa.sede }}
+                                </q-chip>
+                            </div>
+                        </q-card-section>
+
+                        <q-separator />
+
+                        <q-card-actions align="right">
+                            <q-btn
+                                flat
+                                color="primary"
+                                icon="edit"
+                                :to="getEditRoute(programa)"
+                                :disable="!programa.id"
+                                label="Editar"
+                            />
+                            <q-btn
+                                flat
+                                color="negative"
+                                icon="delete"
+                                @click="confirmarEliminacion(programa)"
+                                label="Eliminar"
+                            />
+                        </q-card-actions>
+                    </q-card>
+                </div>
+            </div>
+
+            <q-dialog v-model="dialogoConfirmacion" persistent>
+                <q-card>
+                    <q-card-section class="row items-center">
+                        <q-avatar icon="warning" color="negative" text-color="white" />
+                        <span class="q-ml-sm">¿Está seguro de eliminar este programa?</span>
+                    </q-card-section>
+
+                    <q-card-actions align="right">
+                        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+                        <q-btn
+                            flat
+                            label="Eliminar"
+                            color="negative"
+                            @click="eliminarPrograma"
+                            v-close-popup
+                        />
+                    </q-card-actions>
+                </q-card>
+            </q-dialog>
+        </div>
     </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { ProgramaService } from '../services/programa';
 import { useRouter } from 'vue-router';
 import { QDialog, useQuasar } from 'quasar';
+import { ProgramaService } from '../services/programa';
+import { IPrograma, TipoPrograma } from '../interfaces/IPrograma';
 
 const $q = useQuasar();
 const route = useRouter();
@@ -88,6 +157,52 @@ const columns = [
     { name: 'fecha_inicio', label: 'Fecha de Inicio', align: 'center' as const, field: 'fecha_inicio' },
     { name: 'actions', label: 'Acciones', align: 'center' as const, field: (row: any) => row.actions },
 ];
+
+const dialogoConfirmacion = ref(false);
+const programaAEliminar = ref<IPrograma | null>(null);
+
+const getEditRoute = (programa: IPrograma) => {
+    console.log(programa);
+    if (!programa.tipo || !programa.id) return '/';
+    
+    switch (programa.tipo) {
+        case TipoPrograma.DIPLOMADO:
+            return `/diplomados/editar/${programa.id}`;
+        case TipoPrograma.MAESTRIA:
+            return `/maestrias/editar/${programa.id}`;
+        case TipoPrograma.ESPECIALIDAD:
+            return `/especialidades/editar/${programa.id}`;
+        case TipoPrograma.DOCTORADO:
+            return `/doctorados/editar/${programa.id}`;
+        default:
+            return '/';
+    }
+};
+
+const confirmarEliminacion = (programa: IPrograma) => {
+    programaAEliminar.value = programa;
+    dialogoConfirmacion.value = true;
+};
+
+const eliminarPrograma = async () => {
+    if (!programaAEliminar.value || !programaAEliminar.value.id) return;
+  
+    try {
+        await ProgramaService.eliminarPrograma(programaAEliminar.value.id);
+        await fetchProgramas();
+        $q.notify({
+            type: 'positive',
+            message: 'Programa eliminado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error al eliminar el programa:', error);
+        $q.notify({
+            type: 'negative',
+            message: 'Error al eliminar el programa'
+        });
+    }
+    programaAEliminar.value = null;
+};
 
 onMounted(async () => {
     const usuario = JSON.parse(localStorage.getItem('authUser') || '{}');
@@ -169,7 +284,6 @@ const viewDocument = async (row: any) => {
     // }
 };
 
-
 const editRow = (row: any) => {
     switch (props.tipo) {
         case 1:
@@ -226,5 +340,10 @@ const deleteRow = async (row: any) => {
     align-items: center;
     height: 50px;
     margin-right: 10px;
+}
+
+.my-card {
+    width: 100%;
+    max-width: 350px;
 }
 </style>

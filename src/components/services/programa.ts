@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import type { Programa } from '../interfaces/IPrograma';
+import type { IPrograma } from '../interfaces/IPrograma';
 
 const BASE_URL = '/programas';
 
@@ -27,9 +27,23 @@ const crearPrograma = async (formData: FormData) => {
   }
 };
 
-const actualizarPrograma = async (id: number, programa: Partial<Programa>) => {
+const actualizarPrograma = async (id: number, programa: Partial<IPrograma>) => {
   try {
     const response = await axiosInstance.patch(`${BASE_URL}/${id}`, programa);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar el programa:', error);
+    throw error;
+  }
+};
+
+const actualizarProgramaFormData = async (id: number, formData: FormData) => {
+  try {
+    const response = await axiosInstance.patch(`${BASE_URL}/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error al actualizar el programa:', error);
@@ -76,6 +90,7 @@ export const ProgramaService = {
   obtenerProgramaPorId,
   crearPrograma,
   actualizarPrograma,
+  actualizarProgramaFormData,
   eliminarPrograma,
   obtenerDiplomados,
   obtenerMaestrias,

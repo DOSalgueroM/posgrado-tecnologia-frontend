@@ -1,118 +1,134 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
-    <div class="row q-col-gutter-md">
-      <div class="col-12 col-md-6">
-        <q-input
-          v-model="formData.nombre"
-          label="Nombre del Programa *"
-          :rules="[val => !!val || 'El nombre es requerido']"
-          outlined
-        />
-      </div>
-
-      <div class="col-12 col-md-6">
-        <q-input
-          v-model="formData.sigla"
-          label="Sigla *"
-          :rules="[val => !!val || 'La sigla es requerida']"
-          outlined
-        />
-      </div>
-
-      <div class="col-12">
-        <q-input
-          v-model="formData.descripcion"
-          type="textarea"
-          label="Descripción *"
-          :rules="[val => !!val || 'La descripción es requerida']"
-          outlined
-        />
-      </div>
-
-
-      <div class="col-12 col-md-6">
-        <q-select
-          v-model="formData.area"
-          :options="Object.values(Area)"
-          label="Área *"
-          :rules="[val => !!val || 'El área es requerida']"
-          outlined
-        />
-      </div>
-
-
-      <div class="col-12 col-md-6">
-        <q-input
-          v-model.number="formData.duracion_meses"
-          type="number"
-          label="Duración (meses) *"
-          :rules="[
-            val => !!val || 'La duración es requerida',
-            val => val > 0 || 'La duración debe ser mayor a 0'
-          ]"
-          outlined
-        />
-      </div>
-
-      <div class="col-12 col-md-6">
-        <q-select
-          v-model="formData.modalidad"
-          :options="Object.values(Modalidad)"
-          label="Modalidad *"
-          :rules="[val => !!val || 'La modalidad es requerida']"
-          outlined
-        />
-      </div>
-
-      <div class="col-12 col-md-6">
-        <q-input
-          v-model.number="formData.gestion"
-          type="number"
-          label="Gestión *"
-          :rules="[
-            val => !!val || 'La gestión es requerida',
-            val => val >= 2024 || 'La gestión debe ser 2024 o posterior'
-          ]"
-          outlined
-        />
-      </div>
-
-      <div class="col-12 col-md-6">
-        <q-input
-          v-model="formData.fecha_inicio"
-          type="date"
-          label="Fecha de Inicio *"
-          :rules="[val => !!val || 'La fecha de inicio es requerida']"
-          outlined
-        />
-      </div>
-
-      <div class="col-12 col-md-6">
-        <q-select
-          v-model="formData.sede"
-          :options="municipios"
-          label="Sede *"
-          :rules="[val => !!val || 'La sede es requerida']"
-          outlined
-        />
-      </div>
-      <div class="col-12">
-        <q-file
-          v-model="formData.imagen_url"
-          label="Imagen del Programa"
-          accept=".jpg,.png,.jpeg,.gif"
-          outlined
-        >
-          <template v-slot:prepend>
-            <q-icon name="attach_file" />
-          </template>
-        </q-file>
-        <div v-if="formData.imagen_url" class="q-mt-sm">
-          <img
-            :src="previewImage"
-            style="max-width: 200px; max-height: 200px"
-            class="q-mt-sm"
+    <div class="q-pa-md">
+      <div class="text-h6 q-mb-md">{{ isEditing ? 'Editar' : 'Crear' }} {{ getTipoPrograma }}</div>
+      <div class="row q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-input
+            v-model="formData.nombre"
+            label="Nombre del Programa *"
+            :rules="[val => !!val || 'El nombre es requerido']"
+            outlined
           />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-input
+            v-model="formData.sigla"
+            label="Sigla *"
+            :rules="[val => !!val || 'La sigla es requerida']"
+            outlined
+          />
+        </div>
+
+        <div class="col-12">
+          <q-input
+            v-model="formData.descripcion"
+            type="textarea"
+            label="Descripción *"
+            :rules="[val => !!val || 'La descripción es requerida']"
+            outlined
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-select
+            v-model="formData.areas"
+            :options="Object.values(Area)"
+            label="Áreas *"
+            multiple
+            use-chips
+            stack-label
+            :rules="[val => val && val.length > 0 || 'Debe seleccionar al menos un área']"
+            outlined
+          >
+            <template v-slot:selected-item="scope">
+              <q-chip
+                removable
+                @remove="scope.removeAtIndex(scope.index)"
+                :tabindex="scope.tabindex"
+                color="primary"
+                text-color="white"
+              >
+                {{ scope.opt }}
+              </q-chip>
+            </template>
+          </q-select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-input
+            v-model.number="formData.duracion_meses"
+            type="number"
+            label="Duración (meses) *"
+            :rules="[
+              val => !!val || 'La duración es requerida',
+              val => val > 0 || 'La duración debe ser mayor a 0'
+            ]"
+            outlined
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-select
+            v-model="formData.modalidad"
+            :options="Object.values(Modalidad)"
+            label="Modalidad *"
+            :rules="[val => !!val || 'La modalidad es requerida']"
+            outlined
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-input
+            v-model.number="formData.gestion"
+            type="number"
+            label="Gestión *"
+            :rules="[
+              val => !!val || 'La gestión es requerida',
+              val => val >= 2024 || 'La gestión debe ser 2024 o posterior'
+            ]"
+            outlined
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-input
+            v-model="formData.fecha_inicio"
+            type="date"
+            label="Fecha de Inicio *"
+            :rules="[val => !!val || 'La fecha de inicio es requerida']"
+            outlined
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-select
+            v-model="formData.sede"
+            :options="municipios"
+            label="Sede *"
+            :rules="[val => !!val || 'La sede es requerida']"
+            outlined
+          />
+        </div>
+        <div class="col-12">
+          <q-file
+            v-model="formData.imagen_url"
+            label="Imagen del Programa"
+            accept=".jpg,.png,.jpeg,.gif"
+            outlined
+          >
+            <template v-slot:prepend>
+              <q-icon name="attach_file" />
+            </template>
+          </q-file>
+          <div v-if="formData.imagen_url" class="q-mt-sm">
+            <img
+              :src="previewImage"
+              style="max-width: 200px; max-height: 200px"
+              class="q-mt-sm"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -136,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { Area, Modalidad, TipoPrograma } from '../interfaces/IPrograma';
@@ -144,10 +160,13 @@ import { ProgramaService } from '../services/programa';
 
 const props = defineProps<{
   tipo: number;
+  id?: number;
 }>();
 
 const $q = useQuasar();
 const router = useRouter();
+
+const isEditing = computed(() => !!props.id);
 
 const municipios = [
   'Sucre',
@@ -199,7 +218,7 @@ const formData = ref({
   nombre: '',
   sigla: '',
   descripcion: '',
-  area: null as Area | null,
+  areas: [] as Area[],
   duracion_meses: null as number | null,
   modalidad: null as Modalidad | null,
   gestion: new Date().getFullYear(),
@@ -210,24 +229,46 @@ const formData = ref({
 });
 
 const previewImage = computed(() => {
-  if (formData.value.imagen_url) {
+  if (formData.value.imagen_url instanceof File) {
     return URL.createObjectURL(formData.value.imagen_url);
+  } else if (typeof formData.value.imagen_url === 'string') {
+    return formData.value.imagen_url;
   }
   return '';
+});
+
+onMounted(async () => {
+  if (props.id) {
+    try {
+      const programa = await ProgramaService.obtenerProgramaPorId(props.id);
+      formData.value = {
+        ...programa,
+        areas: programa.areas || [],
+        imagen_url: programa.imagen_url || null,
+        fecha_inicio: programa.fecha_inicio ? new Date(programa.fecha_inicio).toISOString().split('T')[0] : '',
+      };
+    } catch (error) {
+      console.error('Error al obtener el programa:', error);
+      $q.notify({
+        type: 'negative',
+        message: 'Error al cargar los datos del programa'
+      });
+    }
+  }
 });
 
 const onSubmit = async () => {
   try {
     const formDataToSend = new FormData();
     
-    if (formData.value.imagen_url) {
+    if (formData.value.imagen_url instanceof File) {
       formDataToSend.append('imagen_url', formData.value.imagen_url);
     }
 
     formDataToSend.append('nombre', formData.value.nombre);
     formDataToSend.append('sigla', formData.value.sigla);
     formDataToSend.append('descripcion', formData.value.descripcion);
-    formDataToSend.append('area', formData.value.area as string);
+    formDataToSend.append('areas', JSON.stringify(formData.value.areas));
     formDataToSend.append('duracion_meses', formData.value.duracion_meses?.toString() || '');
     formDataToSend.append('modalidad', formData.value.modalidad as string);
     formDataToSend.append('gestion', formData.value.gestion.toString());
@@ -235,12 +276,20 @@ const onSubmit = async () => {
     formDataToSend.append('sede', formData.value.sede);
     formDataToSend.append('tipo', formData.value.tipo);
 
-    await ProgramaService.crearPrograma(formDataToSend);
-    
-    $q.notify({
-      type: 'positive',
-      message: 'Programa creado exitosamente'
-    });
+    if (isEditing.value) {
+      await ProgramaService.actualizarProgramaFormData(props.id!, formDataToSend);
+      $q.notify({
+        type: 'positive',
+        message: 'Programa actualizado exitosamente'
+      });
+    } else {
+      await ProgramaService.crearPrograma(formDataToSend);
+      $q.notify({
+        type: 'positive',
+        message: 'Programa creado exitosamente'
+      });
+    }
+
     switch (props.tipo) {
       case 1:
         router.push('/diplomados');
@@ -256,10 +305,10 @@ const onSubmit = async () => {
         break;
     }
   } catch (error) {
-    console.error('Error al crear el programa:', error);
+    console.error('Error al guardar el programa:', error);
     $q.notify({
       type: 'negative',
-      message: 'Error al crear el programa'
+      message: `Error al ${isEditing.value ? 'actualizar' : 'crear'} el programa`
     });
   }
 };
