@@ -10,7 +10,7 @@
             <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre o descripción"
                 class="q-ml-md" style="width: 300px;" :dark="$q.dark.isActive">
                 <template v-slot:prepend>
-                    <q-icon name="search" />
+                    <q-icon :name="isSearching ? 'sync' : 'search'" :class="{ 'rotate-360': isSearching }" />
                 </template>
             </q-input>
         </div>
@@ -88,10 +88,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuasar, QDialog } from 'quasar';
+import { useQuasar } from 'quasar';
 import { ProgramaService } from '../services/programa';
 import type { IPrograma } from '../interfaces/IPrograma';
 import { TipoPrograma } from '../interfaces/IPrograma';
+import { useDebounceFn } from '@vueuse/core';
 
 const $q = useQuasar();
 const route = useRouter();
@@ -105,6 +106,30 @@ const props = defineProps<{
 
 const rows = ref<any[]>([]);
 const searchMunicipio = ref('');
+const isSearching = ref(false);
+
+const debouncedSearch = useDebounceFn(async (value: string) => {
+  if (value.length >= 3) {
+    isSearching.value = true;
+    try {
+      rows.value = await ProgramaService.buscarProgramasPorNombre(value);
+    } catch (error) {
+      console.error('Error al buscar programas:', error);
+      $q.notify({
+        type: 'negative',
+        message: 'Error al buscar programas'
+      });
+    } finally {
+      isSearching.value = false;
+    }
+  } else if (value.length === 0) {
+    fetchProgramas();
+  }
+}, 400);
+
+watch(searchMunicipio, (newValue) => {
+  debouncedSearch(newValue);
+});
 
 const getTitleByType = computed(() => {
     switch (props.tipo) {
@@ -238,17 +263,7 @@ const fetchProgramas = async () => {
     }
 };
 
-const filteredRows = computed(() => {
-    let filtered = rows.value;
-    if (searchMunicipio.value) {
-        filtered = filtered.filter(row => 
-            row.nombre.toLowerCase().includes(searchMunicipio.value.toLowerCase()) ||
-            row.descripcion.toLowerCase().includes(searchMunicipio.value.toLowerCase())
-        );
-    }
-    return filtered;
-});
-
+const filteredRows = computed(() => rows.value);
 
 const editRow = (row: any) => {
     switch (props.tipo) {
@@ -311,5 +326,18 @@ const deleteRow = async (row: any) => {
 .my-card {
     width: 100%;
     max-width: 350px;
+}
+
+.rotate-360 {
+    animation: rotate-360 1s linear infinite;
+}
+
+@keyframes rotate-360 {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

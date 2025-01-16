@@ -85,6 +85,11 @@ const obtenerProgramasPorGestion = async (gestion: number) => {
   return response.data;
 };
 
+const buscarProgramasPorNombre = async (nombre: string) => {
+  const response = await axiosInstance.get(`${BASE_URL}/search/${nombre}`);
+  return response.data;
+};
+
 export const ProgramaService = {
   obtenerProgramas,
   obtenerProgramaPorId,
@@ -96,5 +101,6 @@ export const ProgramaService = {
   obtenerMaestrias,
   obtenerDoctorados,
   obtenerEspecialidades,
-  obtenerProgramasPorGestion
+  obtenerProgramasPorGestion,
+  buscarProgramasPorNombre
 };
