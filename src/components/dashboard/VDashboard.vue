@@ -7,7 +7,7 @@
                 <q-btn :label="'Crear ' + getTitleByType" color="primary" style="width: 180px; margin-right: 20px;"
                     @click="crearPrograma" />
             </div>
-            <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre o descripción"
+            <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre"
                 class="q-ml-md" style="width: 300px;" :dark="$q.dark.isActive">
                 <template v-slot:prepend>
                     <q-icon :name="isSearching ? 'sync' : 'search'" :class="{ 'rotate-360': isSearching }" />
