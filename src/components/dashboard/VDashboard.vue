@@ -1,14 +1,14 @@
 <template>
-    <q-page>
+    <q-page :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'">
         <div class="row items-center q-pa-md">
-            <div class="text-h6">{{ getTitleByType }}</div>
+            <div class="text-h6" :class="$q.dark.isActive ? 'text-white' : ''">{{ getTitleByType }}</div>
             <q-space />
             <div class="button-container" v-if="admin">
                 <q-btn :label="'Crear ' + getTitleByType" color="primary" style="width: 180px; margin-right: 20px;"
                     @click="crearPrograma" />
             </div>
             <q-input outlined dense debounce="400" v-model="searchMunicipio" placeholder="Buscar por nombre o descripción"
-                class="q-ml-md" style="width: 300px;">
+                class="q-ml-md" style="width: 300px;" :dark="$q.dark.isActive">
                 <template v-slot:prepend>
                     <q-icon name="search" />
                 </template>
@@ -18,13 +18,9 @@
         <div class="q-pa-md">
             <div class="row q-col-gutter-md">
                 <div v-for="programa in filteredRows" :key="programa.id" class="col-12 col-sm-6 col-md-4">
-                    <q-card class="my-card">
-                        <q-img
-                            :src="programa.imagen_url || 'https://cdn.quasar.dev/img/mountains.jpg'"
-                            basic
-                            style="height: 200px"
-                            @error="(e) => console.error('Error cargando imagen:', e)"
-                        >
+                    <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''">
+                        <q-img :src="programa.imagen_url || 'https://cdn.quasar.dev/img/mountains.jpg'" basic
+                            style="height: 200px" @error="(e) => console.error('Error cargando imagen:', e)">
                             <div class="absolute-bottom text-h6 text-white">
                                 {{ programa.nombre }}
                             </div>
@@ -32,7 +28,7 @@
 
                         <q-card-section>
                             <div class="text-subtitle2">{{ programa.sigla }}</div>
-                            <div class="text-caption text-grey q-mb-md">
+                            <div class="text-caption text-grey q-mb-md" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey'">
                                 {{ programa.descripcion }}
                             </div>
                             <div class="row items-center q-gutter-sm">
@@ -59,45 +55,29 @@
                             </div>
                         </q-card-section>
 
-                        <q-separator />
+                        <q-separator :dark="$q.dark.isActive" />
 
                         <q-card-actions align="right">
-                            <q-btn
-                                flat
-                                color="primary"
-                                icon="edit"
-                                :to="getEditRoute(programa)"
-                                :disable="!programa.id"
-                                label="Editar"
-                            />
-                            <q-btn
-                                flat
-                                color="negative"
-                                icon="delete"
-                                @click="confirmarEliminacion(programa)"
-                                label="Eliminar"
-                            />
+                            <q-btn flat :color="$q.dark.isActive ? 'blue-3' : 'primary'" icon="edit"
+                                :to="getEditRoute(programa)" :disable="!programa.id" label="Editar" />
+                            <q-btn flat :color="$q.dark.isActive ? 'red-3' : 'negative'" icon="delete"
+                                @click="confirmarEliminacion(programa)" label="Eliminar" />
                         </q-card-actions>
                     </q-card>
                 </div>
             </div>
 
             <q-dialog v-model="dialogoConfirmacion" persistent>
-                <q-card>
+                <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''">
                     <q-card-section class="row items-center">
                         <q-avatar icon="warning" color="negative" text-color="white" />
                         <span class="q-ml-sm">¿Está seguro de eliminar este programa?</span>
                     </q-card-section>
 
                     <q-card-actions align="right">
-                        <q-btn flat label="Cancelar" color="primary" v-close-popup />
-                        <q-btn
-                            flat
-                            label="Eliminar"
-                            color="negative"
-                            @click="eliminarPrograma"
-                            v-close-popup
-                        />
+                        <q-btn flat :color="$q.dark.isActive ? 'blue-3' : 'primary'" label="Cancelar" v-close-popup />
+                        <q-btn flat :color="$q.dark.isActive ? 'red-3' : 'negative'" label="Eliminar"
+                            @click="eliminarPrograma" v-close-popup />
                     </q-card-actions>
                 </q-card>
             </q-dialog>

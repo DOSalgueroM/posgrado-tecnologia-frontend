@@ -1,22 +1,38 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout view="lHh LpR lFf">
+    <q-header elevated class="bg-primary">
       <q-toolbar>
         <q-btn flat dense round @click="toggleLeftDrawer" icon="menu" aria-label="Menu" />
-        <q-toolbar-title>Programa de Posgrado de Facultad de Tecnologia</q-toolbar-title>
+        <q-toolbar-title>Facultad de Ciencias y Tecnología</q-toolbar-title>
         <q-space />
         <div class="q-gutter-sm row items-center no-wrap">
           <q-btn round dense flat :icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"
-            @click="$q.fullscreen.toggle()" v-if="$q.screen.gt.sm" />
+            @click="$q.fullscreen.toggle()" v-if="$q.screen.gt.sm">
+            <q-tooltip>{{ $q.fullscreen.isActive ? 'Salir de Pantalla Completa' : 'Pantalla Completa' }}</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            round
+            :icon="isDark ? 'dark_mode' : 'light_mode'"
+            @click="toggleDarkMode"
+            class="q-mr-sm"
+          >
+            <q-tooltip>{{ isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro' }}</q-tooltip>
+          </q-btn>
           <q-btn round dense flat icon="logout" @click="logout" />
-
         </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-primary text-white">
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-primary text-white'"
+      bordered
+    >
       <q-list>
-        <q-item to="/" active-class="q-item-no-link-highlighting">
+        <q-item to="/" active-class="q-item-no-link-highlighting" >
           <q-item-section avatar>
             <q-icon name="dashboard" />
           </q-item-section>
@@ -83,17 +99,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 
 const leftDrawerOpen = ref(false);
+const isDark = ref(false);
 const $q = useQuasar();
 const router = useRouter();
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+};
+
+const toggleDarkMode = () => {
+  isDark.value = !isDark.value;
+  $q.dark.set(isDark.value);
+  localStorage.setItem('darkMode', isDark.value.toString());
+};
+
+onMounted(() => {
+  // Recuperar la preferencia de modo oscuro
+  const savedDarkMode = localStorage.getItem('darkMode');
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true';
+    $q.dark.set(isDark.value);
+  }
+});
 
 const logout = () => {
   // Elimina el usuario autenticado del almacenamiento local

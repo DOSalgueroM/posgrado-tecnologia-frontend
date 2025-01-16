@@ -1,7 +1,9 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
     <div class="q-pa-md">
-      <div class="text-h6 q-mb-md">{{ isEditing ? 'Editar' : 'Crear' }} {{ getTipoPrograma }}</div>
+      <div class="text-h6 q-mb-md" :class="$q.dark.isActive ? 'text-white' : ''">
+        {{ isEditing ? 'Editar' : 'Crear' }} {{ getTipoPrograma }}
+      </div>
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
           <q-input
@@ -9,6 +11,7 @@
             label="Nombre del Programa *"
             :rules="[val => !!val || 'El nombre es requerido']"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -18,6 +21,7 @@
             label="Sigla *"
             :rules="[val => !!val || 'La sigla es requerida']"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -31,6 +35,7 @@
               val => val.length >= 10 || 'La descripción debe tener al menos 10 caracteres'
             ]"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -42,11 +47,9 @@
             multiple
             use-chips
             stack-label
-            :rules="[
-              (val: Area[]) => val && val.length > 0 || 'Debe seleccionar al menos un área',
-              (val: Area[]) => val.every((area: Area) => Object.values(Area).includes(area)) || 'Área no válida'
-            ]"
+            :rules="[val => val && val.length > 0 || 'Debe seleccionar al menos un área']"
             outlined
+            :dark="$q.dark.isActive"
           >
             <template v-slot:selected-item="scope">
               <q-chip
@@ -72,6 +75,7 @@
               val => val > 0 || 'La duración debe ser mayor a 0'
             ]"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -82,6 +86,7 @@
             label="Modalidad *"
             :rules="[val => !!val || 'La modalidad es requerida']"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -95,6 +100,7 @@
               val => val >= 2024 || 'La gestión debe ser 2024 o posterior'
             ]"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -105,6 +111,7 @@
             label="Fecha de Inicio *"
             :rules="[val => !!val || 'La fecha de inicio es requerida']"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
 
@@ -115,14 +122,17 @@
             label="Sede *"
             :rules="[val => !!val || 'La sede es requerida']"
             outlined
+            :dark="$q.dark.isActive"
           />
         </div>
+
         <div class="col-12">
           <q-file
             v-model="formData.imagen_url"
             label="Imagen del Programa"
             accept=".jpg,.png,.jpeg,.gif"
             outlined
+            :dark="$q.dark.isActive"
           >
             <template v-slot:prepend>
               <q-icon name="attach_file" />
@@ -143,7 +153,7 @@
     <div class="row justify-end q-mt-md">
       <q-btn
         label="Cancelar"
-        color="negative"
+        :color="$q.dark.isActive ? 'red-3' : 'negative'"
         flat
         class="q-mr-sm"
         @click="$router.back()"
@@ -151,7 +161,7 @@
       <q-btn
         label="Guardar"
         type="submit"
-        color="primary"
+        :color="$q.dark.isActive ? 'primary' : 'primary'"
       />
     </div>
   </q-form>
@@ -373,5 +383,33 @@ const getTipoPrograma = computed(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.dark .q-input,
+.dark .q-select {
+  color: white;
+}
+
+.dark .q-field__native,
+.dark .q-field__prefix,
+.dark .q-field__suffix,
+.dark .q-field__input {
+  color: white;
+}
+
+.dark .q-field__label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark .q-field--outlined .q-field__control {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dark .q-field--outlined .q-field__control:hover {
+  border-color: white;
+}
+
+.dark .q-btn {
+  color: white;
 }
 </style>

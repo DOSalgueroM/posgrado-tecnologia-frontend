@@ -104,7 +104,10 @@ export default defineConfig((/* ctx */) => {
         'AppFullscreen',
         'Notify',
         'Dialog'
-      ]
+      ],
+      config: {
+        dark: "auto"
+      }
     },
 
     // animations: 'all', // --- includes all animations
