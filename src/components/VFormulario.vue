@@ -13,8 +13,8 @@
             </q-toolbar>
         </q-header>
         <q-page-container>
-            <q-page class="bg-grey-2 q-px-md q-py-lg">
-                <q-card class="q-pa-md q-mb-lg">
+            <q-page :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'" class="q-px-md q-py-lg">
+                <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''" class="q-pa-md q-mb-lg">
                     <q-form>
                         <div class="row q-gutter-md">
                             <div class="row2">
@@ -23,21 +23,22 @@
                                     label="Municipios" outlined option-label="descripcion" option-value="id"
                                     @update:model-value="loadRecintos"
                                     :rules="[val => !!val || 'El municipio es requerido']" use-input input-debounce="0"
-                                    @filter="filterMunicipios" fill-input hide-selected />
+                                    @filter="filterMunicipios" fill-input hide-selected 
+                                    :dark="$q.dark.isActive" />
 
                                 <q-select v-model="selectedRecinto" :options="recintos" label="Recintos" outlined
                                     option-label="descripcion" option-value="id" @update:model-value="loadMesas"
                                     :rules="[val => !!val || 'El recinto es requerido']" use-input
-                                    @filter="filterRecintos" input-debounce="0" />
-
-
+                                    @filter="filterRecintos" input-debounce="0" 
+                                    :dark="$q.dark.isActive" />
 
                                 <q-select v-model="selectedMesa" :options="mesas" label="Mesas" outlined emit-value
                                     map-options option-label="nro_mesa" option-value="id" :disable="!selectedRecinto"
-                                    :rules="[val => !!val || 'La mesa es requerida']" />
+                                    :rules="[val => !!val || 'La mesa es requerida']" 
+                                    :dark="$q.dark.isActive" />
 
-
-                                <q-radio v-model="observado" :val="true" label="Tiene observación" />
+                                <q-radio v-model="observado" :val="true" label="Tiene observación" 
+                                    :dark="$q.dark.isActive" />
                             </div>
 
                             <!-- Campo para Subir Archivo -->
@@ -51,7 +52,7 @@
 
                 <div class="cards row q-gutter-md">
                     <!-- Card Mujeres -->
-                    <q-card class="q-pa-md col-12 col-lg-5">
+                    <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''" class="q-pa-md col-12 col-lg-5">
                         <q-card-section>
                             <div class="text-h5 text-weight-medium">Mujeres</div>
                         </q-card-section>
@@ -60,35 +61,40 @@
                             <div class="q-gutter-md candidato-container">
                                 <div class="candidato">
                                     <span class="candidato-label">Patricia Bohorquez:</span>
-                                    <q-input v-model="mujeres.candidato1" label="Candidato 1" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="mujeres.candidato1" type="number" label="Candidato 1" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Janethe Castro:</span>
-                                    <q-input v-model="mujeres.candidato2" label="Candidato 2" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="mujeres.candidato2" type="number" label="Candidato 2" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Lilian Paredes:</span>
-                                    <q-input v-model="mujeres.candidato3" label="Candidato 3" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="mujeres.candidato3" type="number" label="Candidato 3" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Blancos:</span>
-                                    <q-input v-model="mujeres.blancos" label="Blancos" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="mujeres.blancos" type="number" label="Blancos" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Nulos:</span>
-                                    <q-input v-model="mujeres.nulos" label="Nulos" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="mujeres.nulos" type="number" label="Nulos" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                             </div>
                         </q-card-section>
                     </q-card>
 
                     <!-- Card Hombres -->
-                    <q-card class="q-pa-md col-12 col-lg-5">
+                    <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''" class="q-pa-md col-12 col-lg-5">
                         <q-card-section>
                             <div class="text-h5 text-weight-medium">Hombres</div>
                         </q-card-section>
@@ -97,28 +103,33 @@
                             <div class="q-gutter-md candidato-container">
                                 <div class="candidato">
                                     <span class="candidato-label">Favio Chacolla:</span>
-                                    <q-input v-model="hombres.candidato1" label="Candidato 1" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="hombres.candidato1" type="number" label="Candidato 1" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Carlos Ortega:</span>
-                                    <q-input v-model="hombres.candidato2" label="Candidato 2" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="hombres.candidato2" type="number" label="Candidato 2" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Humberto Ortega:</span>
-                                    <q-input v-model="hombres.candidato3" label="Candidato 3" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="hombres.candidato3" type="number" label="Candidato 3" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Blancos:</span>
-                                    <q-input v-model="hombres.blancos" label="Blancos" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="hombres.blancos" type="number" label="Blancos" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                                 <div class="candidato">
                                     <span class="candidato-label">Nulos:</span>
-                                    <q-input v-model="hombres.nulos" label="Nulos" outlined dense
-                                        class="candidato-input"></q-input>
+                                    <q-input v-model="hombres.nulos" type="number" label="Nulos" outlined dense
+                                        class="candidato-input" :rules="[val => val >= 0 || 'El valor debe ser mayor o igual a 0']"
+                                        :dark="$q.dark.isActive" />
                                 </div>
                             </div>
                         </q-card-section>
@@ -128,7 +139,7 @@
                 <!-- Botón Guardar -->
                 <div class="button-container">
                     <q-btn label="Guardar Acta" color="primary" style="width: 250px; margin-right: 20px;"
-                        @click="guardarActa" />
+                        @click="guardarActa" :dark="$q.dark.isActive" />
                 </div>
             </q-page>
         </q-page-container>
