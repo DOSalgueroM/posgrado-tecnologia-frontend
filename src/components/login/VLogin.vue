@@ -10,11 +10,13 @@
         <!-- Contenido principal con QPage -->
         <q-page-container>
             <q-page class="login-page flex flex-center">
-                <q-card class="login-card q-pa-lg" style="width: 400px">
-                    <q-card-section class="text-center">
-                        <q-avatar size="100px" class="q-mb-md">
-                            <q-img src="../../images/logo.png" />
-                        </q-avatar>
+                <q-card class="login-card q-pa-lg bg-white text-dark" style="width: 400px">
+                    <q-card-section class="text-center q-pa-none">
+                        <q-img 
+                            src="../../images/logo.png" 
+                            fit="contain"
+                            style="width: 250px; height: 150px"
+                        />
                         <div class="text-h5 text-weight-bold text-primary">
                             Programas de Posgrado
                         </div>
@@ -31,6 +33,7 @@
                                 outlined 
                                 dense 
                                 class="input-field"
+                                bg-color="white"
                                 :rules="[val => !!val || 'El usuario es requerido']"
                             >
                                 <template v-slot:prepend>
@@ -45,6 +48,7 @@
                                 outlined
                                 dense 
                                 class="input-field"
+                                bg-color="white"
                                 :rules="[val => !!val || 'La contraseña es requerida']"
                             >
                                 <template v-slot:prepend>
@@ -186,6 +190,21 @@ onMounted(() => {
 .login-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.login-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-card :deep(.q-field__label) {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.login-card :deep(.q-field__native),
+.login-card :deep(.q-field__prefix),
+.login-card :deep(.q-field__suffix),
+.login-card :deep(.q-field__input) {
+    color: rgba(0, 0, 0, 0.87);
 }
 
 /* Animaciones */
