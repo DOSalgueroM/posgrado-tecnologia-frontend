@@ -242,11 +242,12 @@ const fetchProgramas = async () => {
                 response = await ProgramaService.obtenerProgramas();
         }
 
-        console.log('Programas recibidos:', response); // Para depuración
+        console.log('Programas recibidos:', response);
         rows.value = response.map((item: any) => ({
-            ...item, // Mantener todos los atributos originales
+            ...item,
             fecha_inicio: item.fecha_inicio ? new Date(item.fecha_inicio).toLocaleDateString() : '',
-            areas: Array.isArray(item.areas) ? item.areas.join(', ') : item.areas
+            areas: Array.isArray(item.areas) ? item.areas : 
+                   typeof item.areas === 'string' ? JSON.parse(item.areas) : []
         }));
     } catch (error: any) {
         console.error('Error al obtener programas:', error);
@@ -268,28 +269,6 @@ const filteredRows = computed(() => {
     return filtered;
 });
 
-const viewDocument = async (row: any) => {
-    // try {
-    //     const acta = await ActasService.obtenerActaById(row.id);
-
-    //     if (acta.imagen) {
-
-    //         const pdf = new jsPDF();
-    //         const imgWidth = 210;
-    //         const imgHeight = (210 * 3) / 4;
-
-    //         pdf.addImage(`data:image/png;base64,${acta.imagen}`, 'PNG', 0, 10, imgWidth, imgHeight);
-    //         const pdfBlob = pdf.output('blob');
-    //         const pdfUrl = URL.createObjectURL(pdfBlob);
-    //         window.open(pdfUrl, '_blank');
-    //     } else {
-    //         alert('No hay documento disponible para esta acta.');
-    //     }
-    // } catch (error) {
-    //     console.error('Error al cargar el documento:', error);
-    //     alert('Error al cargar el documento.');
-    // }
-};
 
 const editRow = (row: any) => {
     switch (props.tipo) {
