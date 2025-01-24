@@ -1,98 +1,105 @@
 <template>
     <q-page :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'">
         <div class="row items-center q-pa-md">
-            <div class="text-h6" :class="$q.dark.isActive ? 'text-white' : ''">Notificaciones</div>
-            <q-space />
-            
-            <!-- Búsqueda por nombre (reutilizado del dashboard) -->
-            <q-input 
-                outlined 
-                dense 
-                debounce="400" 
-                v-model="searchText" 
-                placeholder="Buscar por nombre"
-                class="q-ml-md" 
-                style="width: 300px;" 
-                :dark="$q.dark.isActive"
-            >
-                <template v-slot:prepend>
-                    <q-icon :name="isSearching ? 'sync' : 'search'" :class="{ 'rotate-360': isSearching }" />
-                </template>
-            </q-input>
-
-            <!-- Selector de programas -->
-            <q-select
-                v-model="selectedPrograma"
-                :options="programas"
-                option-label="nombre"
-                option-value="id"
-                label="Seleccionar Programa"
-                outlined
-                dense
-                class="q-ml-md"
-                style="width: 300px;"
-                :dark="$q.dark.isActive"
-                use-input
-                @filter="filterProgramas"
-                input-debounce="0"
-            />
+            <div class="text-h6" :class="$q.dark.isActive ? 'text-white' : ''">
+                <q-icon name="mail" size="32px" class="q-mr-sm" />
+                Enviar Notificación
+            </div>
         </div>
 
         <!-- Formulario de notificación -->
-        <div class="q-pa-md">
-            <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''">
-                <q-card-section>
-                    <div class="text-h6">Notificación General</div>
-                    <div class="text-caption">Enviar a todos los estudiantes del programa</div>
+        <div class="q-pa-md full-width">
+            <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''" style="width: 100%;">
+                <q-card-section class="bg-primary text-white">
+                    <div class="text-h6">
+                        <q-icon name="campaign" class="q-mr-sm" />
+                        Promocionar Programa
+                    </div>
+                    <div class="text-caption">Envía información sobre nuestros programas a potenciales estudiantes</div>
                 </q-card-section>
 
                 <q-card-section>
                     <q-form @submit="enviarNotificacion" class="q-gutter-md">
-                        <!-- Nombre del programa seleccionado (readonly) -->
+                        <!-- Selector de programa -->
+                        <div class="row q-col-gutter-md">
+                            <div class="col-12 col-md-6">
+                                <q-select
+                                    v-model="selectedPrograma"
+                                    :options="programas"
+                                    option-label="nombre"
+                                    label="Seleccionar Programa"
+                                    outlined
+                                    :dark="$q.dark.isActive"
+                                    use-input
+                                    @filter="filterProgramas"
+                                    @update:model-value="actualizarMensaje"
+                                    :rules="[val => !!val || 'Debe seleccionar un programa']"
+                                >
+                                    <template v-slot:prepend>
+                                        <q-icon name="school" />
+                                    </template>
+                                    <template v-slot:option="scope">
+                                        <q-item v-bind="scope.itemProps">
+                                            <q-item-section>
+                                                <q-item-label>{{ scope.opt.nombre }}</q-item-label>
+                                                <q-item-label caption>{{ scope.opt.sigla }} - {{ scope.opt.tipo }}</q-item-label>
+                                            </q-item-section>
+                                        </q-item>
+                                    </template>
+                                </q-select>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <q-input
+                                    v-model="notificacion.email"
+                                    label="Correo Electrónico"
+                                    type="email"
+                                    outlined
+                                    :dark="$q.dark.isActive"
+                                    :rules="[
+                                        val => !!val || 'El correo es requerido',
+                                        val => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(val) || 'Correo inválido'
+                                    ]"
+                                >
+                                    <template v-slot:prepend>
+                                        <q-icon name="email" />
+                                    </template>
+                                </q-input>
+                            </div>
+                        </div>
+
                         <q-input
-                            v-model="programaSeleccionadoNombre"
-                            label="Programa"
-                            readonly
+                            v-model="notificacion.subject"
+                            label="Asunto"
                             outlined
                             :dark="$q.dark.isActive"
-                        />
+                            :rules="[val => !!val || 'El asunto es requerido']"
+                        >
+                            <template v-slot:prepend>
+                                <q-icon name="subject" />
+                            </template>
+                        </q-input>
 
-                        <!-- Título de la notificación -->
                         <q-input
-                            v-model="notificacion.titulo"
-                            label="Título"
-                            :rules="[val => !!val || 'El título es requerido']"
-                            outlined
-                            :dark="$q.dark.isActive"
-                        />
-
-                        <!-- Mensaje de la notificación -->
-                        <q-input
-                            v-model="notificacion.mensaje"
-                            type="textarea"
+                            v-model="notificacion.message"
                             label="Mensaje"
+                            type="textarea"
+                            outlined
+                            :dark="$q.dark.isActive"
                             :rules="[val => !!val || 'El mensaje es requerido']"
-                            outlined
-                            :dark="$q.dark.isActive"
-                        />
+                            rows="12"
+                        >
+                            <template v-slot:prepend>
+                                <q-icon name="message" />
+                            </template>
+                        </q-input>
 
-                        <!-- Tipo de notificación -->
-                        <q-select
-                            v-model="notificacion.tipo"
-                            :options="tiposNotificacion"
-                            label="Tipo de notificación"
-                            :rules="[val => !!val || 'El tipo es requerido']"
-                            outlined
-                            :dark="$q.dark.isActive"
-                        />
-
-                        <!-- Botón de envío -->
-                        <div class="row justify-end">
+                        <div class="row justify-end q-mt-md">
                             <q-btn
-                                label="Enviar Notificación"
+                                label="Enviar"
                                 type="submit"
                                 color="primary"
                                 :loading="isLoading"
+                                icon="send"
                             />
                         </div>
                     </q-form>
@@ -103,38 +110,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { ProgramaService } from '../services/programa';
 import type { IPrograma } from '../interfaces/IPrograma';
+import { NotificacionesService } from 'src/services/notificaciones.service';
 
 const $q = useQuasar();
-const searchText = ref('');
-const isSearching = ref(false);
+const isLoading = ref(false);
 const selectedPrograma = ref<IPrograma | null>(null);
 const programas = ref<IPrograma[]>([]);
-const isLoading = ref(false);
-
-const tiposNotificacion = [
-    'Información',
-    'Advertencia',
-    'Urgente',
-    'Recordatorio'
-];
 
 const notificacion = ref({
-    titulo: '',
-    mensaje: '',
-    tipo: null,
-    programaId: null
+    email: '',
+    subject: '',
+    message: ''
 });
 
-// Computed property para mostrar el nombre del programa seleccionado
-const programaSeleccionadoNombre = computed(() => {
-    return selectedPrograma.value ? selectedPrograma.value.nombre : '';
-});
-
-// Cargar programas al montar el componente
+// Cargar programas
 const fetchProgramas = async () => {
     try {
         const response = await ProgramaService.obtenerProgramas();
@@ -149,24 +142,64 @@ const fetchProgramas = async () => {
     }
 };
 
-// Filtrar programas para el q-select
+// Filtrar programas
 const filterProgramas = (val: string, update: (fn: () => void) => void) => {
     if (val === '') {
         update(() => {
-            // Mostrar todos los programas cuando no hay filtro
-            const allProgramas = programas.value;
-            programas.value = [...allProgramas];
+            programas.value = [...programas.value];
         });
         return;
     }
 
     update(() => {
         const needle = val.toLowerCase();
-        const filtered = programas.value.filter(
+        programas.value = programas.value.filter(
             v => v.nombre.toLowerCase().indexOf(needle) > -1
         );
-        programas.value = filtered;
     });
+};
+
+// Generar mensaje predeterminado
+const actualizarMensaje = () => {
+    if (selectedPrograma.value) {
+        const programa = selectedPrograma.value;
+        notificacion.value.subject = `¡Inscríbete en nuestro ${programa.tipo.toLowerCase()}: ${programa.nombre}!`;
+        notificacion.value.message = generarMensajePrograma(programa);
+    }
+};
+
+const generarMensajePrograma = (programa: IPrograma) => {
+    return `🎓 ¡Saludos cordiales! 🌟
+
+📢 ¡GRAN OPORTUNIDAD ACADÉMICA! 
+En la Facultad de Ciencias y Tecnología - USFX te presentamos:
+
+✨ ${programa.nombre} ✨
+📋 ${programa.sigla}
+
+📌 DETALLES DEL PROGRAMA:
+🔸 Tipo: ${programa.tipo}
+🔸 Duración: ${programa.duracion_meses} meses
+🔸 Modalidad: ${programa.modalidad}
+🔸 Sede: ${programa.sede}
+🔸 Gestión: ${programa.gestion}
+
+📝 DESCRIPCIÓN:
+${programa.descripcion}
+
+🎯 ÁREAS DE ESTUDIO:
+${programa.areas.join(' • ')}
+
+🚀 ¡No pierdas esta oportunidad de desarrollo profesional! 
+✅ Las inscripciones están abiertas.
+
+📍 Para más información y proceso de inscripción:
+🏢 Visítanos: Posgrado, Bloque F último piso
+📞 Contáctanos para más detalles
+
+Atentamente,
+🏛️ Facultad de Tecnología
+🎯 Universidad San Francisco Xavier de Chuquisaca`;
 };
 
 // Enviar notificación
@@ -182,8 +215,7 @@ const enviarNotificacion = async () => {
 
     isLoading.value = true;
     try {
-        // Aquí iría la lógica para enviar la notificación
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación de envío
+        await NotificacionesService.enviarNotificacionSimple(notificacion.value);
         
         $q.notify({
             color: 'positive',
@@ -193,17 +225,16 @@ const enviarNotificacion = async () => {
         
         // Limpiar el formulario
         notificacion.value = {
-            titulo: '',
-            mensaje: '',
-            tipo: null,
-            programaId: null
+            email: '',
+            subject: '',
+            message: ''
         };
         selectedPrograma.value = null;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al enviar notificación:', error);
         $q.notify({
             color: 'negative',
-            message: 'Error al enviar la notificación',
+            message: error.response?.data?.message || 'Error al enviar la notificación',
             icon: 'warning'
         });
     } finally {
@@ -218,16 +249,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.rotate-360 {
-    animation: rotate 1s linear infinite;
+.q-card {
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.full-width {
+    width: 100%;
 }
 </style>
