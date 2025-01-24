@@ -24,15 +24,14 @@ const routes: RouteRecordRaw[] = [
       { path: '/doctorados/editar/:id', component: () => import('components/forms/VProgramaForm.vue'), props: route => ({ tipo: 4, id: Number(route.params.id) }) },
       { path: '/dashboard', component: () => import('pages/DashboardPage.vue') },
       { path: '/notificaciones', component: () => import('components/notificaciones/VNotificaciones.vue') },
+      { path: '/usuarios', component: () => import('components/usuarios/VUsuarios.vue') },
+      { path: '/usuarios/nuevo', component: () => import('components/usuarios/VFormularioUsuarios.vue') },
+      { path: '/usuarios/editar/:id', component: () => import('components/usuarios/VFormularioUsuarios.vue') },
     ],
     meta: { requiresAuth: true, requiresAdmin: true }, 
   },
-  {
-    path: '/formulario',
-    component: () => import('components/VFormulario.vue'), 
-    meta: { requiresAuth: true, role: 'user' }, 
-  },
-  { path: '/usuarios', component: () => import('components/usuarios/VUsuarios.vue') },
+  
+  
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'), 

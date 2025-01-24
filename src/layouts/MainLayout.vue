@@ -107,7 +107,7 @@
           </q-item>
 
          
-          <q-item v-if="isAdmin" to="/Dashboard3" active-class="menu-link" class="q-my-sm">
+          <q-item v-if="isAdmin" to="/usuarios" active-class="menu-link" class="q-my-sm">
             <q-item-section avatar>
               <q-icon name="people" />
             </q-item-section>
