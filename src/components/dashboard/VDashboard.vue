@@ -3,7 +3,7 @@
         <div class="row items-center q-pa-md">
             <div class="text-h6" :class="$q.dark.isActive ? 'text-white' : ''">{{ getTitleByType }}</div>
             <q-space />
-            <div class="button-container" v-if="admin">
+            <div class="button-container">
                 <q-btn :label="'Crear ' + getTitleByType" color="primary" style="width: 180px; margin-right: 20px;"
                     @click="crearPrograma" />
             </div>

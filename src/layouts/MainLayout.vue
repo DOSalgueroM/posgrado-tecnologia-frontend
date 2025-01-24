@@ -106,7 +106,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item to="/Dashboard3" active-class="menu-link" class="q-my-sm">
+          <q-item v-if="isAdmin" to="/Dashboard3" active-class="menu-link" class="q-my-sm">
             <q-item-section avatar>
               <q-icon name="people" />
             </q-item-section>
@@ -176,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import logoFac from '../images/logo fac.png';
@@ -189,6 +189,7 @@ const router = useRouter();
 // Usuario autenticado
 const userName = ref('');
 const userRole = ref('');
+const isAdmin = computed(() => userRole.value === 'ADMIN');
 
 onMounted(() => {
   // Recuperar la preferencia de modo oscuro
@@ -203,7 +204,7 @@ onMounted(() => {
   if (authUserStr) {
     const authUser = JSON.parse(authUserStr);
     userName.value = authUser.nombre || authUser.username;
-    userRole.value = authUser.rol === 'ADMIN' ? 'Administrador' : authUser.rol;
+    userRole.value = authUser.rol;
   }
 });
 
@@ -217,12 +218,23 @@ const toggleDarkMode = () => {
   localStorage.setItem('darkMode', isDark.value.toString());
 };
 
-const logout = () => {
-  // Elimina los datos de autenticación
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('authUser');
-  // Redirige al usuario a la página de inicio de sesión
-  router.push('/login');
+const logout = async () => {
+  try {
+    // Limpiar el localStorage
+    localStorage.clear();
+    // Limpiar variables reactivas
+    userName.value = '';
+    userRole.value = '';
+    // Redirigir al login
+    await router.push('/login');
+  } catch (error) {
+    console.error('Error durante el cierre de sesión:', error);
+    $q.notify({
+      color: 'negative',
+      message: 'Error al cerrar sesión',
+      icon: 'error'
+    });
+  }
 };
 </script>
 

@@ -95,7 +95,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { LoginService } from '../services/login';
+import { LoginService } from '../../components/services/login';
+import { useQuasar } from 'quasar';
 
 // Variables reactivas
 const username = ref('');
@@ -103,8 +104,8 @@ const password = ref('');
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
-const isPwd = ref(true)
-
+const isPwd = ref(true);
+const $q = useQuasar();
 
 // Función de login
 const handleLogin = async () => {
@@ -112,35 +113,50 @@ const handleLogin = async () => {
     error.value = '';
 
     try {
-        const authUser = await LoginService.obtenerCredenciales({
+        const response = await LoginService.obtenerCredenciales({
             username: username.value,
             password: password.value,
         });
 
-        localStorage.setItem('authToken', authUser.access_token);
-        localStorage.setItem('authUser', JSON.stringify(authUser.usuario));
+        console.log('Respuesta del servidor:', response);
 
-        if (authUser.usuario.rol === 'ADMIN') {
-            router.push('/');
-        // } else if (authUser.usuario.rol === 'USUARIO_RECINTO') {
-        //     router.push('/formulario');
-        // } else if (authUser.usuario.rol === 'TRANSCRIPTOR') {
-        //     router.push('/');
-        } else {
-            error.value = 'Usuario o contraseña incorrectos';
+        // Verificar si la respuesta contiene el token y usuario
+        if (!response || !response.access_token || !response.usuario) {
+            throw new Error('Respuesta de autenticación inválida');
         }
+
+        // Guardar datos de autenticación
+        localStorage.setItem('authToken', response.access_token);
+        localStorage.setItem('authUser', JSON.stringify(response.usuario));
+
+        // Mostrar notificación de éxito
+        $q.notify({
+            type: 'positive',
+            message: 'Inicio de sesión exitoso',
+            position: 'top',
+        });
+
+        // Redireccionar según el rol
+        router.push('/');
     } catch (err) {
         console.error('Error al iniciar sesión:', err);
         error.value = 'Usuario o contraseña incorrectos';
+        localStorage.clear();
+        
+        // Mostrar notificación de error
+        $q.notify({
+            type: 'negative',
+            message: 'Error al iniciar sesión: Usuario o contraseña incorrectos',
+            position: 'top',
+        });
     } finally {
         loading.value = false;
     }
 };
 
-
-
 onMounted(() => {
-    console.log('VLogin montado');
+    // Limpiar localStorage al montar el componente
+    localStorage.clear();
 });
 </script>
 
