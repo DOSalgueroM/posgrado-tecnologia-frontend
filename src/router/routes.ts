@@ -23,6 +23,7 @@ const routes: RouteRecordRaw[] = [
       { path: '/doctorados/crear', component: () => import('components/forms/VProgramaForm.vue'), props: { tipo: 4 } },
       { path: '/doctorados/editar/:id', component: () => import('components/forms/VProgramaForm.vue'), props: route => ({ tipo: 4, id: Number(route.params.id) }) },
       { path: '/dashboard', component: () => import('pages/DashboardPage.vue') },
+      { path: '/notificaciones', component: () => import('components/notificaciones/VNotificaciones.vue') },
     ],
     meta: { requiresAuth: true, requiresAdmin: true }, 
   },

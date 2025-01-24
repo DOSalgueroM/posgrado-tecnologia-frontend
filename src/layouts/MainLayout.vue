@@ -106,6 +106,7 @@
             </q-item-section>
           </q-item>
 
+         
           <q-item v-if="isAdmin" to="/Dashboard3" active-class="menu-link" class="q-my-sm">
             <q-item-section avatar>
               <q-icon name="people" />
@@ -156,8 +157,8 @@
               </q-item-section>
             </q-item>
           </q-expansion-item>
-
-          <q-item to="/Dashboard3" active-class="menu-link" class="q-my-sm">
+          
+          <q-item to="/notificaciones" active-class="menu-link" class="q-my-sm">
             <q-item-section avatar>
               <q-icon name="notifications" />
             </q-item-section>
@@ -165,6 +166,8 @@
               <q-item-label>Notificaciones</q-item-label>
             </q-item-section>
           </q-item>
+
+
         </q-list>
       </q-scroll-area>
     </q-drawer>
