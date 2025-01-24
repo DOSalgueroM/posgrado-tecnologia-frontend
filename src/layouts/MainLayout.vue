@@ -51,12 +51,12 @@
 
               <q-separator />
 
-              <q-item clickable v-close-popup>
+              <q-item clickable v-close-popup @click="cambiarPassword">
                 <q-item-section avatar>
-                  <q-icon name="settings" />
+                  <q-icon name="key" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Configuración</q-item-label>
+                  <q-item-label>Cambiar Contraseña</q-item-label>
                 </q-item-section>
               </q-item>
 
@@ -166,8 +166,6 @@
               <q-item-label>Notificaciones</q-item-label>
             </q-item-section>
           </q-item>
-
-
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -176,6 +174,8 @@
       <router-view />
     </q-page-container>
   </q-layout>
+
+  <VCambiarPassword ref="cambiarPasswordRef" />
 </template>
 
 <script setup lang="ts">
@@ -183,11 +183,14 @@ import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import logoFac from '../images/logo fac.png';
+import VCambiarPassword from '../components/usuarios/VCambiarPassword.vue';
+
+const $q = useQuasar();
+const router = useRouter();
 
 const leftDrawerOpen = ref(false);
 const isDark = ref(false);
-const $q = useQuasar();
-const router = useRouter();
+const cambiarPasswordRef = ref();
 
 // Usuario autenticado
 const userName = ref('');
@@ -215,13 +218,17 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
-const toggleDarkMode = () => {
+function toggleDarkMode() {
   isDark.value = !isDark.value;
   $q.dark.set(isDark.value);
   localStorage.setItem('darkMode', isDark.value.toString());
-};
+}
 
-const logout = async () => {
+function cambiarPassword() {
+  cambiarPasswordRef.value?.open();
+}
+
+async function logout() {
   try {
     // Limpiar el localStorage
     localStorage.clear();
@@ -238,7 +245,7 @@ const logout = async () => {
       icon: 'error'
     });
   }
-};
+}
 </script>
 
 <style lang="scss">
