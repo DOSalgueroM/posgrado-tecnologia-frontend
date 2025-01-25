@@ -1,83 +1,51 @@
+
 <template>
   <q-page padding>
     <div class="row q-mb-md items-center justify-end">
       <div class="col-auto">
-        <q-btn
-          color="primary"
-          icon="add"
-          label="Nuevo Usuario"
-          @click="openCreateDialog"
-          style="margin-right: 20px;"
-        />
+        <q-btn color="primary" icon="add" label="Nuevo Usuario" @click="openCreateDialog" style="margin-right: 20px;" />
       </div>
-      
+
       <div class="col-12 col-sm-4 col-md-3 q-pr-sm">
-        <q-input
-          v-model="searchText"
-          dense
-          outlined
-          placeholder="Buscar usuarios..."
-          @update:model-value="handleSearch"
-        >
+        <q-input v-model="searchText" dense outlined placeholder="Buscar usuarios..."
+          @update:model-value="handleSearch">
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
         </q-input>
       </div>
-      
     </div>
 
-    <q-table
-      v-model:pagination="pagination"
-      :rows="users"
-      :columns="columns"
-      :loading="loading"
-      row-key="id"
-      @request="onRequest"
-      class="my-sticky-header-table"
-    >
-      
+    <q-table v-model:pagination="pagination" :rows="users" :columns="columns" :loading="loading" row-key="id"
+      @request="onRequest" class="my-sticky-header-table"
+      style="height: calc(100vh - 170px); width: 100%">
+
       <template v-slot:body-cell-index="props">
-        {{ getRowNumber(props.rowIndex) }}
+        
+        <div class="text-center">{{ getRowNumber(props.rowIndex) }}</div>
       </template>
 
-      
       <template v-slot:body-cell-activo="props">
-        <q-icon
-          :name="props.row.activo ? 'check_circle' : 'cancel'"
-          :color="props.row.activo ? 'positive' : 'negative'"
-          size="sm"
-        />
+        <div class="text-center">
+          <q-icon :name="props.row.activo ? 'check_circle' : 'cancel'" :color="props.row.activo ? 'positive' : 'negative'"
+            size="sm" />
+        </div>
       </template>
 
-      
       <template v-slot:body-cell-actions="props">
-        <div class="q-gutter-sm">
-          <q-btn
-            flat
-            round
-            color="primary"
-            icon="edit"
-            size="sm"
-            @click="openEditDialog(props.row)"
-          >
+        <q-th style="width: 50px;" />
+        <div class="text-center q-gutter-xs">
+          
+          <q-btn flat round color="primary" icon="edit" size="sm" @click="openEditDialog(props.row)">
             <q-tooltip>Editar usuario</q-tooltip>
           </q-btn>
-          <q-btn
-            flat
-            round
-            color="negative"
-            icon="delete"
-            size="sm"
-            @click="confirmDelete(props.row)"
-          >
+          <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmDelete(props.row)">
             <q-tooltip>Eliminar usuario</q-tooltip>
           </q-btn>
         </div>
       </template>
     </q-table>
 
-    
     <q-dialog v-model="deleteDialog">
       <q-card>
         <q-card-section class="row items-center">
@@ -87,13 +55,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn
-            flat
-            label="Eliminar"
-            color="negative"
-            :loading="deleteLoading"
-            @click="deleteUser"
-          />
+          <q-btn flat label="Eliminar" color="negative" :loading="deleteLoading" @click="deleteUser" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -103,7 +65,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { UserService } from '../../components/services/user';
-import { useQuasar} from 'quasar';
+import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 
 interface Usuario {
@@ -143,34 +105,34 @@ const pagination = ref({
 });
 
 const columns = [
-  { 
+  {
     name: 'index',
     label: 'Nº',
     field: 'index',
-    align: 'left' as const,
+    align: 'center' as const,
   },
-  { 
+  {
     name: 'nombreCompleto',
     label: 'Nombre Completo',
-    field: 'nombreCompleto',
+    field: 'nombre_apellido',
     align: 'left' as const,
     sortable: true
   },
-  { 
+  {
     name: 'username',
     label: 'Usuario',
     field: 'username',
     align: 'left' as const,
     sortable: true
   },
-  { 
+  {
     name: 'activo',
     label: 'Estado',
     field: 'activo',
     align: 'center' as const,
     sortable: true
   },
-  { 
+  {
     name: 'actions',
     label: 'Acciones',
     field: 'actions',
@@ -185,7 +147,7 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
       page: props.pagination.page,
       limit: props.pagination.rowsPerPage,
     };
-    
+
     if (props.pagination.sortBy) {
       paginationDto.sortBy = props.pagination.sortBy;
       paginationDto.sortOrder = props.pagination.descending ? 'DESC' : 'ASC';
@@ -200,6 +162,7 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
       paginationDto,
       filterDto
     );
+    console.log(response);
 
     users.value = response.data.map((user: any, index: number) => ({
       ...user,
@@ -207,6 +170,7 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
     }));
 
     pagination.value.rowsNumber = response.meta.total;
+
   } catch (error: any) {
     $q.notify({
       type: 'negative',
@@ -246,7 +210,7 @@ const confirmDelete = (user: Usuario) => {
 
 const deleteUser = async () => {
   if (!userToDelete.value) return;
-  
+
   deleteLoading.value = true;
   try {
     await UserService.eliminarUsuario(userToDelete.value.id);
@@ -289,6 +253,10 @@ onMounted(() => {
 
   thead tr:first-child th {
     top: 0;
+  }
+
+  .q-table__body td {
+    text-align: center;
   }
 }
 </style>
