@@ -1,14 +1,20 @@
 
 <template>
-  <q-page padding>
+  <q-page :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'" padding>
     <div class="row q-mb-md items-center justify-end">
       <div class="col-auto">
         <q-btn color="primary" icon="add" label="Nuevo Usuario" @click="openCreateDialog" style="margin-right: 20px;" />
       </div>
 
       <div class="col-12 col-sm-4 col-md-3 q-pr-sm">
-        <q-input v-model="searchText" dense outlined placeholder="Buscar usuarios..."
-          @update:model-value="handleSearch">
+        <q-input 
+          v-model="searchText" 
+          dense 
+          outlined 
+          placeholder="Buscar usuarios..."
+          @update:model-value="handleSearch"
+          :dark="$q.dark.isActive"
+        >
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
@@ -16,33 +22,40 @@
       </div>
     </div>
 
-    <q-table v-model:pagination="pagination" :rows="users" :columns="columns" :loading="loading" row-key="id"
-      @request="onRequest" class="my-sticky-header-table"
-      style="height: calc(100vh - 170px); width: 100%">
+    <q-table 
+      v-model:pagination="pagination" 
+      :rows="users" 
+      :columns="columns" 
+      :loading="loading" 
+      row-key="id"
+      @request="onRequest" 
+      class="my-sticky-header-table"
+      :dark="$q.dark.isActive"
+      style="height: calc(100vh - 170px); width: 100%"
+    >
 
       <template v-slot:body-cell-index="props">
-        
-        <div class="text-center">{{ getRowNumber(props.rowIndex) }}</div>
+        <q-td :props="props" class="text-center">
+          {{ getRowNumber(props.rowIndex) }}
+        </q-td>
       </template>
 
       <template v-slot:body-cell-activo="props">
-        <div class="text-center">
+        <q-td :props="props" class="text-center">
           <q-icon :name="props.row.activo ? 'check_circle' : 'cancel'" :color="props.row.activo ? 'positive' : 'negative'"
             size="sm" />
-        </div>
+        </q-td>
       </template>
 
       <template v-slot:body-cell-actions="props">
-        <q-th style="width: 50px;" />
-        <div class="text-center q-gutter-xs">
-          
+        <q-td :props="props" class="text-center">
           <q-btn flat round color="primary" icon="edit" size="sm" @click="openEditDialog(props.row)">
             <q-tooltip>Editar usuario</q-tooltip>
           </q-btn>
           <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmDelete(props.row)">
             <q-tooltip>Eliminar usuario</q-tooltip>
           </q-btn>
-        </div>
+        </q-td>
       </template>
     </q-table>
 
@@ -112,7 +125,7 @@ const columns = [
     align: 'center' as const,
   },
   {
-    name: 'nombreCompleto',
+    name: 'nombre_apellido',
     label: 'Nombre Completo',
     field: 'nombre_apellido',
     align: 'left' as const,
@@ -149,6 +162,7 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
     };
 
     if (props.pagination.sortBy) {
+      // Aseguramos que el campo de ordenación coincida con el nombre en la base de datos
       paginationDto.sortBy = props.pagination.sortBy;
       paginationDto.sortOrder = props.pagination.descending ? 'DESC' : 'ASC';
     }
@@ -162,7 +176,6 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
       paginationDto,
       filterDto
     );
-    console.log(response);
 
     users.value = response.data.map((user: any, index: number) => ({
       ...user,
@@ -174,7 +187,8 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: 'Error al cargar los usuarios: ' + error.message
+      message: error.response?.data?.message || 'Error al cargar los usuarios',
+      position: 'top'
     });
   } finally {
     loading.value = false;
@@ -243,7 +257,7 @@ onMounted(() => {
   .q-table__top,
   .q-table__bottom,
   thead tr:first-child th {
-    background-color: white;
+    background-color: transparent !important;
   }
 
   thead tr th {
@@ -257,6 +271,43 @@ onMounted(() => {
 
   .q-table__body td {
     text-align: center;
+  }
+}
+
+:deep(.q-table__container) {
+  background-color: transparent !important;
+}
+
+:deep(.q-table) {
+  background-color: transparent !important;
+}
+
+body.body--dark {
+  .my-sticky-header-table {
+    color: white;
+    
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th,
+    tbody tr td {
+      color: white !important;
+      background-color: #1d1d1d !important;
+    }
+
+    tbody tr {
+      background-color: #1d1d1d !important;
+      
+      &:hover {
+        background-color: #2d2d2d !important;
+      }
+    }
+  }
+
+  .q-dialog {
+    .q-card {
+      background-color: #1d1d1d !important;
+      color: white;
+    }
   }
 }
 </style>

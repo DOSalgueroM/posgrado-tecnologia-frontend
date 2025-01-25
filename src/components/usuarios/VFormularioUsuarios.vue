@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="row justify-center">
       <div class="col-12 col-md-8 col-lg-6">
-        <q-card class="q-pa-md">
+        <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''" class="q-pa-md" flat bordered>
           <q-card-section>
             <div class="text-h6">{{ isEdit ? 'Editar Usuario' : 'Nuevo Usuario' }}</div>
           </q-card-section>
@@ -14,6 +14,7 @@
                 label="Nombre Completo"
                 :rules="[val => !!val || 'El nombre completo es requerido']"
                 outlined
+                :dark="$q.dark.isActive"
               />
 
               <q-input
@@ -21,6 +22,7 @@
                 label="Usuario"
                 :rules="[val => !!val || 'El usuario es requerido']"
                 outlined
+                :dark="$q.dark.isActive"
               />
 
               <q-input
@@ -29,6 +31,7 @@
                 :type="showPassword ? 'text' : 'password'"
                 :rules="passwordRules"
                 outlined
+                :dark="$q.dark.isActive"
               >
                 <template v-slot:append>
                   <q-icon
@@ -48,6 +51,7 @@
                   val => val === form.password || 'Las contraseñas no coinciden'
                 ]"
                 outlined
+                :dark="$q.dark.isActive"
               >
                 <template v-slot:append>
                   <q-icon
@@ -64,6 +68,7 @@
                 label="Rol"
                 :rules="[val => !!val || 'El rol es requerido']"
                 outlined
+                :dark="$q.dark.isActive"
               />
 
               <div class="row justify-end q-gutter-sm">
@@ -146,3 +151,13 @@ const onSubmit = async () => {
   }
 };
 </script>
+
+<style scoped>
+:deep(.q-field__control) {
+  background: v-bind('$q.dark.isActive ? "rgba(255, 255, 255, 0.03)" : "white"') !important;
+}
+
+:deep(.q-field__label) {
+  color: v-bind('$q.dark.isActive ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)"');
+}
+</style>
