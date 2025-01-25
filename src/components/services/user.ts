@@ -11,7 +11,7 @@ interface PaginationDto {
 }
 
 interface FilterUsuariosDto {
-    searchtext?: string;
+    searchText?: string;
 }
 
 interface UpdatePasswordDto {

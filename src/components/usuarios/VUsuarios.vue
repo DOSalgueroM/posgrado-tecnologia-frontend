@@ -96,7 +96,7 @@ interface PaginationDto {
 }
 
 interface FilterUsuariosDto {
-  searchtext?: string;
+  searchText?: string;
 }
 
 const $q = useQuasar();
@@ -169,7 +169,7 @@ const loadUsers = async (props = { pagination: pagination.value }) => {
 
     const filterDto: FilterUsuariosDto = {};
     if (searchText.value) {
-      filterDto.searchtext = searchText.value;
+      filterDto.searchText = searchText.value;
     }
 
     const response = await UserService.obtenerUsuariosPaginados(
