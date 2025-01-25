@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'" padding>
     <div class="row justify-center">
       <div class="col-12 col-md-8 col-lg-6">
         <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''" class="q-pa-md" flat bordered>

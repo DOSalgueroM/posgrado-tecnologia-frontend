@@ -47,6 +47,12 @@
         </q-td>
       </template>
 
+      <template v-slot:body-cell-rol="props">
+        <q-td :props="props" class="text-center">
+          {{ formatRol(props.row.rol) }}
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-actions="props">
         <q-td :props="props" class="text-center">
           <q-btn flat round color="primary" icon="edit" size="sm" @click="openEditDialog(props.row)">
@@ -86,6 +92,7 @@ interface Usuario {
   nombre_apellido: string;
   username: string;
   activo: boolean;
+  rol: string;
 }
 
 interface PaginationDto {
@@ -136,6 +143,13 @@ const columns = [
     label: 'Usuario',
     field: 'username',
     align: 'left' as const,
+    sortable: true
+  },
+  {
+    name: 'rol',
+    label: 'Rol',
+    field: 'rol',
+    align: 'center' as const,
     sortable: true
   },
   {
@@ -243,6 +257,14 @@ const deleteUser = async () => {
     deleteLoading.value = false;
     userToDelete.value = null;
   }
+};
+
+const formatRol = (rol: string) => {
+  const rolMap: Record<string, string> = {
+    'ADMIN': 'Administrador',
+    'USUARIO': 'Usuario'
+  };
+  return rolMap[rol] || rol;
 };
 
 onMounted(() => {
