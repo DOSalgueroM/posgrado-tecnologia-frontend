@@ -18,7 +18,7 @@
                             style="width: 250px; height: 150px"
                         />
                         <div class="text-h5 text-weight-bold text-primary">
-                            Programas de Posgrado
+                            Sistema de Notificación y Prescripción de la Unidad de Posgrado de la Facultad de Tecnología
                         </div>
                         <div class="text-subtitle2 text-grey-7 q-mt-sm">
                             Sistema de Autenticación

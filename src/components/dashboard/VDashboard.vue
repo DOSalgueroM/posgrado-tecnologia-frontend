@@ -21,14 +21,16 @@
                     <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : ''">
                         <q-img :src="programa.imagen_url || 'https://cdn.quasar.dev/img/mountains.jpg'" basic
                             style="height: 200px" @error="(e) => console.error('Error cargando imagen:', e)">
-                            <div class="absolute-bottom text-h6 text-white">
-                                {{ programa.nombre }}
+                            <div class="absolute-bottom">
+                                <div class="text-h6 text-white image-title">
+                                    {{ programa.nombre }}
+                                </div>
                             </div>
                         </q-img>
 
                         <q-card-section>
-                            <div class="text-subtitle2">{{ programa.sigla }}</div>
-                            <div class="text-caption text-grey q-mb-md" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey'">
+                            <div class="text-subtitle2 program-title">{{ programa.sigla }}</div>
+                            <div class="text-caption text-grey q-mb-md program-description" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey'">
                                 {{ programa.descripcion }}
                             </div>
                             <div class="row items-center q-gutter-sm">
@@ -311,8 +313,50 @@ const deleteRow = async (row: any) => {
 <style scoped>
 .q-table {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.image-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2em;
+    max-height: 2.4em;
+    word-wrap: break-word;
+    word-break: break-word;
+    padding: 0 16px;
+    width: 100%;
+    white-space: normal;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+.program-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2em;
+    max-height: 2.4em;
+    word-wrap: break-word;
+    word-break: break-word;
+    width: 100%;
+    white-space: normal;
+}
+
+.program-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4em;
+    max-height: 4.2em;
+    word-wrap: break-word;
+    word-break: break-word;
+    width: 100%;
+    white-space: normal;
 }
 
 .q-td .q-gutter-sm {
