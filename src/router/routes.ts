@@ -3,7 +3,18 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
-    component: () => import('components/login/VLogin.vue'), 
+    component: () => import('components/login/VLogin.vue'),
+  },
+  {
+    path: '/preinscripcion',
+    component: () => import('layouts/PublicLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'preinscripcion',
+        component: () => import('components/preinscripcion/VFormularioPreinscripcion.vue')
+      }
+    ]
   },
   {
     path: '/',
@@ -28,14 +39,12 @@ const routes: RouteRecordRaw[] = [
       { path: '/usuarios/nuevo', component: () => import('components/usuarios/VFormularioUsuarios.vue') },
       { path: '/usuarios/editar/:id', component: () => import('components/usuarios/VFormularioUsuarios.vue') },
     ],
-    meta: { requiresAuth: true, requiresAdmin: true }, 
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
-  
-  
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'), 
-  },
+    component: () => import('pages/ErrorNotFound.vue'),
+  }
 ];
 
 export default routes;

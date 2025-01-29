@@ -34,8 +34,10 @@ export default defineRouter(function () {
 
   // rol admin y rol usuario recinto
   Router.beforeEach((to, from, next) => {
+    const publicRoutes = ['/login', '/preinscripcion'];
     const user = isAuthenticated();
-    if (!user && to.path !== '/login') {
+    
+    if (!user && !publicRoutes.includes(to.path)) {
       return next('/login');
     }
 
