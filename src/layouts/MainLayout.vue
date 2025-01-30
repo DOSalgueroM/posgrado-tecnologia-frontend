@@ -166,6 +166,15 @@
               <q-item-label>Notificaciones</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item to="/preinscripciones" active-class="menu-link" class="q-my-sm">
+            <q-item-section avatar>
+              <q-icon name="how_to_reg" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Preinscripciones</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>

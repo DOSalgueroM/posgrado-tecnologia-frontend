@@ -55,9 +55,6 @@
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props" class="text-center">
-          <q-btn flat round color="primary" icon="edit" size="sm" @click="openEditDialog(props.row)">
-            <q-tooltip>Editar usuario</q-tooltip>
-          </q-btn>
           <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmDelete(props.row)">
             <q-tooltip>Eliminar usuario</q-tooltip>
           </q-btn>
@@ -224,11 +221,7 @@ const handleSearch = () => {
 };
 
 const openCreateDialog = () => {
-  router.push('/usuarios/nuevo');
-};
-
-const openEditDialog = (user: Usuario) => {
-  router.push(`/usuarios/editar/${user.id}`);
+  router.push('/usuarios/crear');
 };
 
 const confirmDelete = (user: Usuario) => {
