@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <div class="text-h6 q-mb-md">Enviar Notificación Masiva</div>
+    <!-- <div class="text-h6 q-mb-md">Enviar Notificación Masiva</div> -->
     
     <q-form @submit="enviarNotificacion" class="q-gutter-md">
       <div class="row q-col-gutter-md">
@@ -28,7 +28,7 @@
           <q-select
             v-model="notificacionMasiva.tipo"
             :options="tiposPersona"
-            label="Tipo de Persona *"
+            label="Grado Académico *"
             outlined
             :dark="$q.dark.isActive"
             :rules="[val => !!val || 'El tipo de persona es requerido']"
@@ -47,7 +47,7 @@
           <q-select
             v-model="notificacionMasiva.nivelEstudio"
             :options="nivelesEstudioDisponibles"
-            label="Nivel de Estudio *"
+            label="Tipo de Programa *"
             outlined
             :dark="$q.dark.isActive"
             :rules="[val => !!val || 'El nivel de estudio es requerido']"
