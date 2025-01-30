@@ -48,7 +48,7 @@
 
     <q-table
       v-model:pagination="pagination"
-      :rows="preinscripciones"
+      :rows="filteredPreinscripciones"
       :columns="columns"
       :loading="loading"
       row-key="id"
@@ -125,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { PreinscripcionService } from 'src/services/preinscripcion';
 import { ProgramaService } from 'src/services/programa';
@@ -162,9 +162,19 @@ const $q = useQuasar();
 // State
 const loading = ref(false);
 const searchText = ref('');
+const preinscripciones = ref<Preinscripcion[]>([]);
+const filteredPreinscripciones = computed(() => {
+  if (!searchText.value) return preinscripciones.value;
+  
+  const searchLower = searchText.value.toLowerCase();
+  return preinscripciones.value.filter(p => 
+    p.nombreCompleto.toLowerCase().includes(searchLower) ||
+    p.email.toLowerCase().includes(searchLower) ||
+    p.celular.includes(searchLower)
+  );
+});
 const selectedTipo = ref<string | null>(null); 
 const selectedPrograma = ref<number | null>(null);
-const preinscripciones = ref<Preinscripcion[]>([]);
 const programas = ref<{ label: string; value: number; }[]>([]);
 const showDetails = ref(false);
 const selectedPreinscripcion = ref<Preinscripcion | null>(null);
@@ -245,7 +255,8 @@ const onTipoChange = () => {
 };
 
 const handleSearch = () => {
-  // TODO: Implementar búsqueda en el servidor
+  // La búsqueda se realiza automáticamente a través del computed filteredPreinscripciones
+  pagination.value.page = 1; // Resetear a la primera página cuando se busca
 };
 
 const getRowNumber = (index: number) => {
