@@ -152,6 +152,18 @@
         />
       </div>
     </q-form>
+    <div class="row q-col-gutter-md">
+      <div class="col-12">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Información de Destinatarios</div>
+          </q-card-section>
+          <q-card-section>
+            {{ infoDestinatarios }}
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -160,8 +172,9 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { NotificacionesService } from '../../services/notificaciones.service';
 import { ProgramaService } from '../services/programa';
+import { PersonaService } from '../../services/persona.service';
 import type { IPrograma } from '../interfaces/IPrograma';
-import { Area } from '../interfaces/IPrograma';
+import { Area, TipoPersona } from '../interfaces/IPrograma';
 
 interface NotificacionMasiva {
   area: Area | null;
@@ -177,6 +190,11 @@ const selectedPrograma = ref<IPrograma | null>(null);
 const programas = ref<IPrograma[]>([]);
 const searchQuery = ref('');
 
+// Variables para manejar destinatarios
+const destinatarios = ref<any[]>([]);
+const destinatariosLoading = ref(false);
+
+// Estado inicial
 const notificacionMasiva = ref<NotificacionMasiva>({
   area: null,
   tipo: null,
@@ -193,8 +211,8 @@ const areas = ref([
 ]);
 
 const tiposPersona = ref([
-  { label: 'Profesional', value: 'PROFESIONAL' },
-  { label: 'No Profesional', value: 'NO_PROFESIONAL' }
+  { label: 'Profesional', value: TipoPersona.TITULADO },
+  { label: 'No Profesional', value: TipoPersona.NO_TITULADO }
 ]);
 
 // Computed para controlar acceso solo a diplomados
@@ -276,6 +294,65 @@ const programasFiltrados = computed(() => {
   return filtrados;
 });
 
+// Computed para mostrar información de destinatarios
+const infoDestinatarios = computed(() => {
+  if (!destinatarios.value.length) return '';
+  
+  const totalDestinatarios = destinatarios.value.length;
+  const emailsValidos = destinatarios.value.filter(d => d.email && d.email.includes('@')).length;
+  
+  return `${emailsValidos} destinatarios válidos de un total de ${totalDestinatarios}`;
+});
+
+// Watch para cargar destinatarios cuando cambien los criterios
+watch(
+  [
+    () => notificacionMasiva.value.area,
+    () => notificacionMasiva.value.tipo,
+    () => notificacionMasiva.value.nivelEstudio
+  ],
+  async ([newArea, newTipo, newNivel], [oldArea, oldTipo, oldNivel]) => {
+    if (newArea && newTipo && newNivel &&
+        (newArea !== oldArea || newTipo !== oldTipo || newNivel !== oldNivel)) {
+      await cargarDestinatarios();
+    } else {
+      destinatarios.value = [];
+    }
+  }
+);
+
+// Función para cargar destinatarios
+const cargarDestinatarios = async () => {
+  try {
+    destinatariosLoading.value = true;
+    destinatarios.value = [];
+
+    if (!notificacionMasiva.value.area || 
+        !notificacionMasiva.value.tipo || 
+        !notificacionMasiva.value.nivelEstudio) {
+      return;
+    }
+
+    const response = await PersonaService.findByAreaAndTipo(
+      notificacionMasiva.value.area.toString(),
+      notificacionMasiva.value.tipo,
+      notificacionMasiva.value.nivelEstudio
+    );
+
+    destinatarios.value = response;
+    console.log(destinatarios.value);
+
+  } catch (error: any) {
+    $q.notify({
+      type: 'warning',
+      message: error.response?.data?.message || 'Error al cargar destinatarios',
+      position: 'top'
+    });
+  } finally {
+    destinatariosLoading.value = false;
+  }
+};
+
 // Función para cargar programas
 const fetchProgramas = async () => {
   try {
@@ -341,37 +418,66 @@ Atentamente,
 Universidad San Francisco Xavier de Chuquisaca`;
 };
 
-// Función para enviar notificación
+// Función para enviar la notificación
 const enviarNotificacion = async () => {
   try {
-    // Validate that all required fields are filled
+    // Validar que todos los campos requeridos estén llenos
     if (!notificacionMasiva.value.area || 
         !notificacionMasiva.value.tipo || 
         !notificacionMasiva.value.nivelEstudio || 
-        !notificacionMasiva.value.subject || 
+        !selectedPrograma.value ||
+        !notificacionMasiva.value.subject ||
         !notificacionMasiva.value.message) {
-      $q.notify({
-        color: 'negative',
-        message: 'Por favor complete todos los campos requeridos'
-      });
-      return;
+      throw new Error('Por favor complete todos los campos requeridos');
+    }
+
+    // Validar que haya destinatarios
+    if (!destinatarios.value.length) {
+      throw new Error('No hay destinatarios para enviar la notificación');
+    }
+
+    // Filtrar y mostrar correos válidos
+    const emailsValidos = destinatarios.value
+      .filter(d => d.email && d.email.includes('@') && d.email.includes('.'))
+      .map(d => d.email);
+
+    console.log('Destinatarios encontrados:', destinatarios.value.length);
+    console.log('Correos válidos:', emailsValidos.length);
+    console.log('Lista de correos válidos:', emailsValidos);
+    
+    // Validar que haya correos válidos
+    if (!emailsValidos.length) {
+      throw new Error('No hay correos electrónicos válidos para enviar la notificación');
     }
 
     isLoading.value = true;
-    await NotificacionesService.enviarNotificacion({
+
+    // Preparar los datos para enviar
+    const notificacionData = {
       area: notificacionMasiva.value.area.toString(),
       tipo: notificacionMasiva.value.tipo,
       nivelEstudio: notificacionMasiva.value.nivelEstudio,
       subject: notificacionMasiva.value.subject,
       message: notificacionMasiva.value.message
+    };
+
+    console.log('Enviando notificación con los siguientes datos:', {
+      ...notificacionData,
+      totalDestinatarios: destinatarios.value.length,
+      emailsValidos: emailsValidos.length
     });
 
+    // Enviar la notificación usando el servicio
+    const response = await NotificacionesService.enviarNotificacion(notificacionData);
+
+    // Mostrar mensaje de éxito
     $q.notify({
-      color: 'positive',
-      message: 'Notificación enviada exitosamente'
+      type: 'positive',
+      message: `Notificación enviada exitosamente a ${response.emailsSent} destinatarios`,
+      position: 'top'
     });
 
-    // Limpiar formulario
+    // Limpiar el formulario
     notificacionMasiva.value = {
       area: null,
       tipo: null,
@@ -380,13 +486,16 @@ const enviarNotificacion = async () => {
       message: ''
     };
     selectedPrograma.value = null;
+    searchQuery.value = '';
+    destinatarios.value = [];
 
   } catch (error: any) {
     console.error('Error al enviar notificación:', error);
+    // Mostrar mensaje de error
     $q.notify({
-      color: 'negative',
-      message: error.response?.data?.message || 'Error al enviar la notificación',
-      icon: 'warning'
+      type: 'negative',
+      message: error.response?.data?.message || error.message || 'Error al enviar la notificación',
+      position: 'top'
     });
   } finally {
     isLoading.value = false;

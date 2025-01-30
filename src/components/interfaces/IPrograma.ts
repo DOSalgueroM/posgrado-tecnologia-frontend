@@ -3,13 +3,21 @@ export enum TipoPrograma {
     MAESTRIA = 'MAESTRIA',
     DOCTORADO = 'DOCTORADO',
     ESPECIALIDAD = 'ESPECIALIDAD'
-  }
+}
 
 export enum Area {
     QUIMICAS = 'QUIMICAS',
     TECNICOS = 'TECNICOS',
     SISTEMAS = 'SISTEMAS',
-  }
+}
+export enum TipoPersona {
+    TITULADO = 'titulado',
+    EGRESADO = 'egresado',
+    ESTUDIANTE = 'estudiante',
+    NO_TITULADO = 'no_titulado'
+}
+
+
 
   export enum Modalidad {
     PRESENCIAL = 'PRESENCIAL',
