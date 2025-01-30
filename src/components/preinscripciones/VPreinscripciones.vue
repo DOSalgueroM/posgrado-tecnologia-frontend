@@ -30,7 +30,7 @@
         />
       </div>
 
-      <div class="col-12 col-sm-4 col-md-3">
+      <div class="col-12 col-sm-4 col-md-3 q-pr-sm">
         <q-input 
           v-model="searchText" 
           dense 
@@ -44,9 +44,27 @@
           </template>
         </q-input>
       </div>
+
+      <div class="col-12 col-sm-12 col-md-3 q-gutter-x-sm">
+        <q-btn
+          color="primary"
+          icon="print"
+          label="Imprimir"
+          @click="printTable"
+          :disable="!filteredPreinscripciones.length"
+        />
+        <q-btn
+          color="negative"
+          icon="picture_as_pdf"
+          label="PDF"
+          @click="exportToPDF"
+          :disable="!filteredPreinscripciones.length"
+        />
+      </div>
     </div>
 
     <q-table
+      ref="tableRef"
       v-model:pagination="pagination"
       :rows="filteredPreinscripciones"
       :columns="columns"
@@ -73,6 +91,12 @@
           <q-btn flat round color="info" icon="visibility" size="sm" @click="verDetalles(props.row)">
             <q-tooltip>Ver detalles</q-tooltip>
           </q-btn>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-fechaRegistro="props">
+        <q-td :props="props" class="text-left">
+          {{ formatDate(props.value) }}
         </q-td>
       </template>
     </q-table>
@@ -129,6 +153,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { PreinscripcionService } from 'src/services/preinscripcion';
 import { ProgramaService } from 'src/services/programa';
+import html2pdf from 'html2pdf.js';
 
 interface Preinscripcion {
   id: number;
@@ -195,14 +220,22 @@ const tiposPrograma = [
 ];
 
 const columns = [
-  { name: 'index', label: 'N°', field: 'index', align: 'center' as const, sortable: false },
-  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left' as const, sortable: true },
-  { name: 'email', label: 'Email', field: 'email', align: 'left' as const, sortable: true },
-  { name: 'celular', label: 'Teléfono', field: 'celular', align: 'left' as const, sortable: true },
-  { name: 'programa.nombre', label: 'Programa', field: (row: Preinscripcion) => row.programa.nombre, align: 'left' as const, sortable: true },
-  { name: 'fechaRegistro', label: 'Fecha', field: 'fechaRegistro', align: 'left' as const, sortable: true },
+  { name: 'index', label: 'N°', field: 'index', align: 'center' as const },
+  { name: 'nombreCompleto', label: 'Nombre', field: 'nombreCompleto', align: 'left' as const },
+  { name: 'email', label: 'Email', field: 'email', align: 'left' as const },
+  { name: 'celular', label: 'Teléfono', field: 'celular', align: 'left' as const },
+  { 
+    name: 'fechaRegistro', 
+    label: 'Fecha', 
+    field: 'fechaRegistro', 
+    align: 'left' as const, 
+    sortable: true,
+    format: (val: string) => formatDate(val)
+  },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' as const, sortable: false }
 ];
+
+const tableRef = ref();
 
 const loadProgramas = async () => {
   if (!selectedTipo.value) return;
@@ -281,6 +314,179 @@ const onRequest = async (props: RequestProps) => {
 const verDetalles = (preinscripcion: Preinscripcion) => {
   selectedPreinscripcion.value = preinscripcion;
   showDetails.value = true;
+};
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  try {
+    // Asumiendo que la fecha viene en formato ISO (YYYY-MM-DDTHH:mm:ss.sssZ)
+    const fecha = new Date(dateString);
+    if (isNaN(fecha.getTime())) return dateString; // Si la fecha no es válida, retorna el string original
+    
+    return fecha.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC' // Asegurarnos de que la fecha se muestre en la zona horaria correcta
+    });
+  } catch (error) {
+    console.error('Error al formatear la fecha:', error);
+    return dateString; // En caso de error, retorna el string original
+  }
+};
+
+const exportToPDF = () => {
+  const element = document.createElement('div');
+  const currentDate = new Date().toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  
+  element.innerHTML = `
+    <div style="padding: 40px; font-family: Arial, sans-serif; font-size: 12pt; max-width: 800px; margin: 0 auto;">
+      <!-- Encabezado -->
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2196F3; padding-bottom: 20px;">
+        <h1 style="color: #1976D2; font-size: 24pt; margin: 0; padding: 0;">Universidad San Francisco Xavier</h1>
+        <h2 style="color: #424242; font-size: 18pt; margin: 10px 0;">Dirección de Posgrado</h2>
+        <h3 style="color: #616161; font-size: 16pt; margin: 10px 0; font-weight: normal;">Lista de Preinscripciones</h3>
+      </div>
+
+      <!-- Información del Programa -->
+      <div style="margin-bottom: 20px; background-color: #F5F5F5; padding: 15px; border-radius: 5px;">
+        <p style="margin: 0; color: #424242;">
+          <strong>Programa:</strong> ${selectedPrograma.value ? programas.value.find(p => p.value === selectedPrograma.value)?.label : 'Todos los programas'}
+        </p>
+        <p style="margin: 5px 0 0 0; color: #616161;">
+          <strong>Fecha de emisión:</strong> ${currentDate}
+        </p>
+      </div>
+
+      <!-- Tabla -->
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12pt; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+        <thead>
+          <tr style="background-color: #1976D2; color: white;">
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">N°</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Nombre</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Email</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Teléfono</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredPreinscripciones.value.map((item, index) => `
+            <tr style="background-color: ${index % 2 === 0 ? '#FFFFFF' : '#F5F5F5'}">
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${index + 1}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${item.nombreCompleto}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${item.email}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${item.celular}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${formatDate(item.fechaRegistro)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <!-- Pie de página -->
+      <div style="margin-top: 30px; text-align: center; color: #757575; font-size: 10pt; border-top: 1px solid #E0E0E0; padding-top: 20px;">
+        <p style="margin: 0;">Este documento fue generado automáticamente por el sistema de posgrado.</p>
+        <p style="margin: 5px 0 0 0;">Universidad San Francisco Xavier ${new Date().getFullYear()}</p>
+      </div>
+    </div>
+  `;
+
+  const opt = {
+    margin: 0.5,
+    filename: `preinscripciones_${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { 
+      unit: 'in',
+      format: 'letter', 
+      orientation: 'portrait'
+    }
+  } as const;
+
+  html2pdf().set(opt).from(element).save().catch((error: unknown) => {
+    console.error('Error al exportar a PDF:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Error al exportar a PDF'
+    });
+  });
+};
+
+const printTable = () => {
+  const currentDate = new Date().toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const printContent = document.createElement('div');
+  printContent.innerHTML = `
+    <div style="padding: 40px; font-family: Arial, sans-serif; font-size: 12pt; max-width: 800px; margin: 0 auto;">
+      <!-- Encabezado -->
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2196F3; padding-bottom: 20px;">
+        <h1 style="color: #1976D2; font-size: 24pt; margin: 0; padding: 0;">Universidad San Francisco Xavier</h1>
+        <h2 style="color: #424242; font-size: 18pt; margin: 10px 0;">Dirección de Posgrado de la Facultad de Ciencias y Tecnología</h2>
+        <h3 style="color: #616161; font-size: 16pt; margin: 10px 0; font-weight: normal;">Lista de Preinscripciones</h3>
+      </div>
+
+      <!-- Información del Programa -->
+      <div style="margin-bottom: 20px; background-color: #F5F5F5; padding: 15px; border-radius: 5px;">
+        <p style="margin: 0; color: #424242;">
+          <strong>Programa:</strong> ${selectedPrograma.value ? programas.value.find(p => p.value === selectedPrograma.value)?.label : 'Todos los programas'}
+        </p>
+        <p style="margin: 5px 0 0 0; color: #616161;">
+          <strong>Fecha de emisión:</strong> ${currentDate}
+        </p>
+      </div>
+
+      <!-- Tabla -->
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12pt; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+        <thead>
+          <tr style="background-color: #1976D2; color: white;">
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">N°</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Nombre</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Email</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Teléfono</th>
+            <th style="padding: 12px 15px; text-align: left; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredPreinscripciones.value.map((item, index) => `
+            <tr style="background-color: ${index % 2 === 0 ? '#FFFFFF' : '#F5F5F5'}">
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${index + 1}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${item.nombreCompleto}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${item.email}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${item.celular}</td>
+              <td style="padding: 12px 15px; font-family: Arial, sans-serif; border: 1px solid #E0E0E0;">${formatDate(item.fechaRegistro)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <!-- Pie de página -->
+      <div style="margin-top: 30px; text-align: center; color: #757575; font-size: 10pt; border-top: 1px solid #E0E0E0; padding-top: 20px;">
+        <p style="margin: 0;">Este documento fue generado automáticamente por el sistema de posgrado.</p>
+        <p style="margin: 5px 0 0 0;">Universidad San Francisco Xavier ${new Date().getFullYear()}</p>
+      </div>
+    </div>
+  `;
+
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(printContent.innerHTML);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Por favor, permita las ventanas emergentes para imprimir'
+    });
+  }
 };
 
 onMounted(() => {
