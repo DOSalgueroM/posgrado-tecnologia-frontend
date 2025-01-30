@@ -427,9 +427,9 @@ const printTable = () => {
     <div style="padding: 40px; font-family: Arial, sans-serif; font-size: 12pt; max-width: 800px; margin: 0 auto;">
       <!-- Encabezado -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2196F3; padding-bottom: 20px;">
-        <h1 style="color: #1976D2; font-size: 24pt; margin: 0; padding: 0;">Universidad San Francisco Xavier</h1>
-        <h2 style="color: #424242; font-size: 18pt; margin: 10px 0;">Dirección de Posgrado de la Facultad de Ciencias y Tecnología</h2>
-        <h3 style="color: #616161; font-size: 16pt; margin: 10px 0; font-weight: normal;">Lista de Preinscripciones</h3>
+        <h1 style="color: #1976D2; font-size: 14pt; margin: 0; padding: 0;">Universidad San Francisco Xavier</h1>
+        <h2 style="color: #424242; font-size: 14pt; margin: 10px 0;">Dirección de Posgrado de la Facultad de Ciencias y Tecnología</h2>
+        <h3 style="color: #616161; font-size: 12pt; margin: 10px 0; font-weight: normal;">Lista de Preinscripciones</h3>
       </div>
 
       <!-- Información del Programa -->

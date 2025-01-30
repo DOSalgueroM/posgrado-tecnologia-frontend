@@ -43,7 +43,11 @@
                                 label="Celular *"
                                 outlined
                                 dense
-                                :rules="[val => !!val || 'El celular es requerido']"
+                                :rules="[
+                                    val => !!val || 'El número de celular es requerido',
+                                    val => /^\d+$/.test(val) || 'El número de celular solo debe contener dígitos',
+                                    val => val.length === 8 || 'El número de celular debe tener exactamente 8 dígitos'
+                                ]"
                             />
 
                             <q-input 
