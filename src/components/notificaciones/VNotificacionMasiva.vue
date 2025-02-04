@@ -385,6 +385,24 @@ const actualizarMensaje = () => {
 
 // Función para generar mensaje de programa
 const generarMensajePrograma = (programa: IPrograma) => {
+  const areasCapitalizadas = programa.areas.map(area => {
+    const areaLower = area.toLowerCase();
+    if (areaLower.includes('tecnic')) {
+      return 'Técnico Superior';
+    }
+    return area.charAt(0).toUpperCase() + area.slice(1).toLowerCase();
+  });
+
+  const tipoFormateado = programa.tipo.toLowerCase() === 'tecnico' ? 'Técnico Superior' : programa.tipo;
+  
+  // Formatear la fecha
+  const fecha = new Date(programa.fecha_inicio);
+  const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
   return `🎓 ¡Saludos cordiales! 🌟
 
 📢 ¡GRAN OPORTUNIDAD ACADÉMICA! 
@@ -394,27 +412,29 @@ En la Facultad de Ciencias y Tecnología - USFX te presentamos:
 📋 ${programa.sigla}
 
 📌 DETALLES DEL PROGRAMA:
-🔸 Tipo: ${programa.tipo}
+🔸 Tipo: ${tipoFormateado}
 🔸 Duración: ${programa.duracion_meses} meses
 🔸 Modalidad: ${programa.modalidad}
 🔸 Sede: ${programa.sede}
 🔸 Gestión: ${programa.gestion}
+🔸 Fecha de inicio: ${fechaFormateada}
 
 📝 DESCRIPCIÓN:
 ${programa.descripcion}
 
 🎯 ÁREAS DE ESTUDIO:
-${programa.areas.join(' • ')}
+${areasCapitalizadas.join(', ')} y ramas afines
 
 🚀 ¡No pierdas esta oportunidad de desarrollo profesional! 
 ✅ Las inscripciones están abiertas.
 
 📍 Para más información y proceso de inscripción:
-🏢 Visítanos: Posgrado, Bloque F último piso
-📞 Contáctanos para más detalles
+🏢 Visítanos: Posgrado, Bloque F último piso, aulas F304 y F307
+📞 Contáctanos para más detalles al 73355497 - 68622233
 
 Atentamente,
 🏛️ Facultad de Tecnología
+Dirección: Regimiento Campos #180
 Universidad San Francisco Xavier de Chuquisaca`;
 };
 
@@ -438,7 +458,12 @@ const enviarNotificacion = async () => {
 
     // Filtrar y mostrar correos válidos
     const emailsValidos = destinatarios.value
-      .filter(d => d.email && d.email.includes('@') && d.email.includes('.'))
+      .filter(d => 
+        d.email && 
+        d.email.includes('@') && 
+        d.email.includes('.') && 
+        !d.email.toLowerCase().includes('ninguno')
+      )
       .map(d => d.email);
 
     console.log('Destinatarios encontrados:', destinatarios.value.length);
