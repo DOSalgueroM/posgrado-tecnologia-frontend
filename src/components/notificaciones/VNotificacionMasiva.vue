@@ -433,7 +433,7 @@ ${areasCapitalizadas.join(', ')} y ramas afines
 📞 Contáctanos para más detalles al 73355497 - 68622233
 
 Atentamente,
-🏛️ Facultad de Tecnología
+🏛️ Facultad de Ciencias y Tecnología
 Dirección: Regimiento Campos #180
 Universidad San Francisco Xavier de Chuquisaca`;
 };
