@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A Quasar Project",
   "productName": "Posgrado App",
-  "author": "DOSalgueroM <daviniasalguero@gmail.com>",
+  "author": "Franz Alvis y Davinia Salguero",
   "type": "module",
   "private": true,
   "scripts": {
