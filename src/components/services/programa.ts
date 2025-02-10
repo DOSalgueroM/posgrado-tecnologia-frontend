@@ -90,6 +90,21 @@ const buscarProgramasPorNombre = async (nombre: string) => {
   return response.data;
 };
 
+const getProgramasByTipo = async (tipo: string) => {
+  switch (tipo) {
+    case 'DIPLOMADO':
+      return obtenerDiplomados();
+    case 'MAESTRIA':
+      return obtenerMaestrias();
+    case 'DOCTORADO':
+      return obtenerDoctorados();
+    case 'ESPECIALIDAD':
+      return obtenerEspecialidades();
+    default:
+      throw new Error('Tipo de programa no válido');
+  }
+};
+
 export const ProgramaService = {
   obtenerProgramas,
   obtenerProgramaPorId,
@@ -102,5 +117,6 @@ export const ProgramaService = {
   obtenerDoctorados,
   obtenerEspecialidades,
   obtenerProgramasPorGestion,
-  buscarProgramasPorNombre
+  buscarProgramasPorNombre,
+  getProgramasByTipo
 };

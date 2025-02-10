@@ -91,6 +91,9 @@
           <q-btn flat round color="info" icon="visibility" size="sm" @click="verDetalles(props.row)">
             <q-tooltip>Ver detalles</q-tooltip>
           </q-btn>
+          <q-btn flat round color="primary" icon="edit" size="sm" @click="editarPreinscripcion(props.row)">
+            <q-tooltip>Editar</q-tooltip>
+          </q-btn>
           <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmarEliminacion(props.row)">
             <q-tooltip>Eliminar</q-tooltip>
           </q-btn>
@@ -149,6 +152,87 @@
       </q-card>
     </q-dialog>
 
+    <!-- Modal de edición -->
+    <q-dialog v-model="showEdit" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Editar Preinscripción</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="guardarEdicion" class="q-gutter-md">
+            <q-input
+              v-model="editForm.nombreCompleto"
+              label="Nombre Completo"
+              :rules="[val => !!val || 'El nombre es requerido']"
+              outlined
+              dense
+              :dark="$q.dark.isActive"
+            />
+            <q-input
+              v-model="editForm.carrera"
+              label="Carrera"
+              :rules="[val => !!val || 'La carrera es requerida']"
+              outlined
+              dense
+              :dark="$q.dark.isActive"
+            />
+            <q-input
+              v-model="editForm.cu"
+              label="CU"
+              :rules="[val => !!val || 'El CU es requerido']"
+              outlined
+              dense
+              :dark="$q.dark.isActive"
+            />
+            <q-input
+              v-model="editForm.celular"
+              label="Celular"
+              :rules="[
+                val => !!val || 'El celular es requerido',
+                val => val.length === 8 || 'El celular debe tener 8 dígitos',
+                val => /^\d+$/.test(val) || 'Solo se permiten números'
+              ]"
+              outlined
+              dense
+              :dark="$q.dark.isActive"
+            />
+            <q-input
+              v-model="editForm.email"
+              label="Email"
+              :rules="[
+                val => !!val || 'El email es requerido',
+                val => /^[^@]+@[^@]+\.[a-zA-Z]{2,}$/.test(val) || 'Email inválido'
+              ]"
+              outlined
+              dense
+              :dark="$q.dark.isActive"
+            />
+            <q-select
+              v-model="editForm.programaId"
+              :options="programas"
+              :option-value="(opt) => opt.value"
+              :option-label="(opt) => opt.label"
+              emit-value
+              map-options
+              label="Programa"
+              :rules="[val => !!val || 'El programa es requerido']"
+              outlined
+              dense
+              :dark="$q.dark.isActive"
+            />
+
+            <div class="row justify-end q-mt-md">
+              <q-btn label="Cancelar" color="negative" flat v-close-popup />
+              <q-btn label="Guardar" type="submit" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
     <!-- Modal de confirmación de eliminación -->
     <q-dialog v-model="showDeleteConfirm" persistent>
       <q-card>
@@ -167,10 +251,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { PreinscripcionService } from 'src/services/preinscripcion';
-import { ProgramaService } from 'src/services/programa';
+import { PreinscripcionService } from '../services/preinscripcion';
+import { ProgramaService } from '../services/programa';
 import html2pdf from 'html2pdf.js';
 
 interface Preinscripcion {
@@ -200,6 +284,15 @@ interface Programa {
   tipo: string;
 }
 
+interface PreinscripcionDto {
+  nombreCompleto: string;
+  carrera: string;
+  cu: string;
+  celular: string;
+  email: string;
+  programaId: number;
+}
+
 const $q = useQuasar();
 
 // State
@@ -218,11 +311,21 @@ const filteredPreinscripciones = computed(() => {
 });
 const selectedTipo = ref<string | null>(null); 
 const selectedPrograma = ref<number | null>(null);
-const programas = ref<{ label: string; value: number; }[]>([]);
+const programas = ref<{ label: string; value: number; tipo: string }[]>([]);
 const showDetails = ref(false);
 const selectedPreinscripcion = ref<Preinscripcion | null>(null);
 const showDeleteConfirm = ref(false);
 const preinscripcionToDelete = ref<Preinscripcion | null>(null);
+const showEdit = ref(false);
+const editForm = ref<PreinscripcionDto>({
+  nombreCompleto: '',
+  carrera: '',
+  cu: '',
+  celular: '',
+  email: '',
+  programaId: 0
+});
+const editingId = ref<number | null>(null);
 
 const pagination = ref({
   sortBy: 'fechaRegistro',
@@ -266,7 +369,8 @@ const loadProgramas = async () => {
     const data = await ProgramaService.getProgramasByTipo(selectedTipo.value);
     programas.value = data.map((p: Programa) => ({
       label: p.nombre,
-      value: p.id
+      value: p.id,
+      tipo: p.tipo
     }));
   } catch (error) {
     console.error('Error al cargar programas:', error);
@@ -364,6 +468,72 @@ const eliminarPreinscripcion = async () => {
   } finally {
     loading.value = false;
     preinscripcionToDelete.value = null;
+  }
+};
+
+const editarPreinscripcion = (preinscripcion: Preinscripcion) => {
+  console.log('Preinscripción a editar:', preinscripcion); // Para debug
+  editingId.value = preinscripcion.id;
+  // Cargar los programas del tipo correspondiente
+  selectedTipo.value = preinscripcion.programa.tipo;
+  loadProgramas().then(() => {
+    console.log('Programas cargados:', programas.value); // Para debug
+    const programaId = Number(preinscripcion.programa.id);
+    editForm.value = {
+      nombreCompleto: preinscripcion.nombreCompleto,
+      carrera: preinscripcion.carrera,
+      cu: preinscripcion.cu,
+      celular: preinscripcion.celular,
+      email: preinscripcion.email,
+      programaId
+    };
+    console.log('Form inicial:', editForm.value); // Para debug
+    showEdit.value = true;
+  });
+};
+
+const guardarEdicion = async () => {
+  try {
+    if (!editingId.value) return;
+    
+    // Asegurarse de que programaId sea un número válido
+    const programaId = Number(editForm.value.programaId);
+    console.log('ProgramaId a enviar:', programaId); // Para debug
+    
+    if (!programaId || isNaN(programaId)) {
+      $q.notify({
+        color: 'negative',
+        message: 'Por favor seleccione un programa válido',
+        icon: 'error'
+      });
+      return;
+    }
+
+    const dataToSend = {
+      ...editForm.value,
+      programaId
+    };
+    
+    console.log('Datos a enviar:', dataToSend); // Para debug
+    
+    const response = await PreinscripcionService.actualizar(editingId.value, dataToSend);
+    console.log('Respuesta del servidor:', response); // Para debug
+    
+    $q.notify({
+      color: 'positive',
+      message: 'Preinscripción actualizada correctamente',
+      icon: 'check'
+    });
+    
+    showEdit.value = false;
+    await loadPreinscripciones();
+  } catch (error) {
+    console.error('Error al actualizar:', error);
+    $q.notify({
+      color: 'negative',
+      message: 'Error al actualizar la preinscripción',
+      icon: 'error'
+    });
   }
 };
 
@@ -543,6 +713,17 @@ const printTable = () => {
 onMounted(() => {
   if (selectedTipo.value) {
     loadProgramas();
+  }
+});
+
+watch(selectedTipo, async (newTipo) => {
+  if (newTipo && showEdit.value) {
+    await loadProgramas();
+    // Actualizar el programaId si es necesario
+    const programaActual = programas.value.find(p => p.value === editForm.value.programaId);
+    if (!programaActual) {
+      editForm.value.programaId = programas.value[0]?.value || 0;
+    }
   }
 });
 </script>
