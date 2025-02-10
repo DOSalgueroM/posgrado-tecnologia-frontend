@@ -168,11 +168,12 @@ ${programa.areas.join(' • ')}
 ✅ Las inscripciones están abiertas.
 
 📍 Para más información y proceso de inscripción:
-🏢 Visítanos: Posgrado, Bloque F último piso
-📞 Contáctanos para más detalles
+🏢 Visítanos: Posgrado, Bloque F último piso, aulas F304 y F307
+📞 Contáctanos para más detalles al 73355497 - 68622233
 
 Atentamente,
-🏛️ Facultad de Tecnología
+🏛️ Facultad de Ciencias y Tecnología
+Dirección: Regimiento Campos #180
 Universidad San Francisco Xavier de Chuquisaca`;
 };
 
