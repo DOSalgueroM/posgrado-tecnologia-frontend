@@ -91,6 +91,9 @@
           <q-btn flat round color="info" icon="visibility" size="sm" @click="verDetalles(props.row)">
             <q-tooltip>Ver detalles</q-tooltip>
           </q-btn>
+          <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmarEliminacion(props.row)">
+            <q-tooltip>Eliminar</q-tooltip>
+          </q-btn>
         </q-td>
       </template>
 
@@ -142,6 +145,21 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cerrar" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Modal de confirmación de eliminación -->
+    <q-dialog v-model="showDeleteConfirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="warning" color="negative" text-color="white" />
+          <span class="q-ml-sm">¿Está seguro que desea eliminar esta preinscripción?</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
+          <q-btn flat label="Eliminar" color="negative" @click="eliminarPreinscripcion" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -203,6 +221,8 @@ const selectedPrograma = ref<number | null>(null);
 const programas = ref<{ label: string; value: number; }[]>([]);
 const showDetails = ref(false);
 const selectedPreinscripcion = ref<Preinscripcion | null>(null);
+const showDeleteConfirm = ref(false);
+const preinscripcionToDelete = ref<Preinscripcion | null>(null);
 
 const pagination = ref({
   sortBy: 'fechaRegistro',
@@ -314,6 +334,37 @@ const onRequest = async (props: RequestProps) => {
 const verDetalles = (preinscripcion: Preinscripcion) => {
   selectedPreinscripcion.value = preinscripcion;
   showDetails.value = true;
+};
+
+const confirmarEliminacion = (preinscripcion: Preinscripcion) => {
+  preinscripcionToDelete.value = preinscripcion;
+  showDeleteConfirm.value = true;
+};
+
+const eliminarPreinscripcion = async () => {
+  if (!preinscripcionToDelete.value) return;
+  
+  try {
+    loading.value = true;
+    await PreinscripcionService.eliminar(preinscripcionToDelete.value.id);
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Preinscripción eliminada correctamente'
+    });
+    
+    // Recargar la lista de preinscripciones
+    await loadPreinscripciones();
+  } catch (error) {
+    console.error('Error al eliminar la preinscripción:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Error al eliminar la preinscripción'
+    });
+  } finally {
+    loading.value = false;
+    preinscripcionToDelete.value = null;
+  }
 };
 
 const formatDate = (dateString: string) => {

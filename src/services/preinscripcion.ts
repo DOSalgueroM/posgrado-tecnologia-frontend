@@ -29,5 +29,9 @@ export const PreinscripcionService = {
       }
     });
     return response.data;
+  },
+
+  async eliminar(id: number): Promise<void> {
+    await axiosInstance.delete(`/preinscripcion/${id}`);
   }
 };
