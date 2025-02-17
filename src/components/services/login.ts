@@ -10,10 +10,8 @@ const ENDPOINT = {
 const obtenerCredenciales = async (data: ILogin) => {
     try {
         const response = await axios.post(ENDPOINT.obtenerCredenciales(), data);
-        console.log('Respuesta del servidor:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error en el servicio de login:', error);
         throw error;
     }
 };

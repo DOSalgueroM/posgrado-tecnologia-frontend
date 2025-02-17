@@ -35,12 +35,12 @@ export function useDashboard() {
     const socket = io(import.meta.env.VITE_SOCKET_URL);
 
     socket.on('connect', () => {
-      console.log('Conectado al servidor de sockets');
+      //console.log('Conectado al servidor de sockets');
     });
 
     socket.on('actualizar_votos_por_candidatos', (data) => {
       listaVotosCandidatos.value = data;
-      console.log(data);
+      //console.log(data);
     });
 
     socket.on('actualizar_votos_por_municipios_y_candidatos', (data) => {
