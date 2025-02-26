@@ -107,6 +107,27 @@
         </div>
       </div>
 
+      <!-- Selector de Encargada -->
+      <div class="row q-col-gutter-md">
+        <div class="col-12">
+          <q-select
+            v-model="encargadaSeleccionada"
+            :options="encargadas"
+            label="Encargada *"
+            outlined
+            :dark="$q.dark.isActive"
+            option-label="nombre"
+            :rules="[val => !!val || 'Debe seleccionar una encargada']"
+            :disable="!selectedPrograma"
+            @update:model-value="actualizarMensaje"
+          >
+            <template v-slot:prepend>
+              <q-icon name="person" />
+            </template>
+          </q-select>
+        </div>
+      </div>
+
       <!-- Asunto y Mensaje -->
       <div class="row q-col-gutter-md">
         <div class="col-12">
@@ -176,6 +197,12 @@ import { PersonaService } from '../../services/persona.service';
 import type { IPrograma } from '../interfaces/IPrograma';
 import { Area, TipoPersona } from '../interfaces/IPrograma';
 
+// Interfaz para Encargada
+interface Encargada {
+  nombre: string;
+  telefono: string;
+}
+
 interface NotificacionMasiva {
   area: Area | null;
   tipo: string | null;
@@ -189,6 +216,7 @@ const isLoading = ref(false);
 const selectedPrograma = ref<IPrograma | null>(null);
 const programas = ref<IPrograma[]>([]);
 const searchQuery = ref('');
+const encargadaSeleccionada = ref<Encargada | null>(null);
 
 // Variables para manejar destinatarios
 const destinatarios = ref<any[]>([]);
@@ -214,6 +242,15 @@ const tiposPersona = ref([
   { label: 'Profesional', value: TipoPersona.TITULADO },
   { label: 'No Profesional', value: TipoPersona.NO_TITULADO }
 ]);
+
+// Lista de encargadas
+const encargadas: Encargada[] = [
+  { nombre: 'Mishel', telefono: '73449220' },
+  { nombre: 'Cusinca', telefono: '68622233' },
+  { nombre: 'Sara', telefono: '73429125' },
+  { nombre: 'Alejandra', telefono: '68739686' },
+  { nombre: 'Yanine', telefono: '74407050' }
+];
 
 // Computed para controlar acceso solo a diplomados
 const soloDiplomados = computed(() => {
@@ -422,15 +459,14 @@ En la Facultad de Ciencias y Tecnología - USFX te presentamos:
 📝 DESCRIPCIÓN:
 ${programa.descripcion}
 
-🎯 ÁREAS DE ESTUDIO:
-${areasCapitalizadas.join(', ')} y ramas afines
-
 🚀 ¡No pierdas esta oportunidad de desarrollo profesional! 
 ✅ Las inscripciones están abiertas.
 
 📍 Para más información y proceso de inscripción:
 🏢 Visítanos: Posgrado, Bloque F último piso, aulas F304 y F307
-📞 Contáctanos para más detalles al 73355497 - 68622233
+📞 Contáctanos para más detalles al 73355497 - ${encargadaSeleccionada.value ? encargadaSeleccionada.value.telefono : '68622233'}
+
+*Inscribite aquí* 👉 (https://docs.google.com/forms/d/e/1FAIpQLSdUBGJcSm08d9TtgPFA00x-NbSaliGNP1WZ50a0jiKi3kStLg/viewform?pli=1)
 
 Atentamente,
 🏛️ Facultad de Ciencias y Tecnología
