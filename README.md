@@ -1,6 +1,12 @@
-# Elecciones App (elecciones-frontend)
+# Postgrado Frontend
 
 A Quasar Project
+
+## Autores
+```bash
+Davinia Salguero Mencias
+Franz Alvis
+```
 
 ## Install the dependencies
 ```bash
